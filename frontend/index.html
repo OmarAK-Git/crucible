@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crucible — Adversarial Prompt-Hardening Engine</title>
+    <!-- Import Outfit font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #090d16;
+            --card-bg: #111827;
+            --card-hover-bg: #172237;
+            --border: #1f2937;
+            --border-hover: #374151;
+            
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-glow: rgba(79, 70, 229, 0.15);
+            
+            --defender-color: #f97316; /* Defender orange */
+            --defender-bg: rgba(249, 115, 22, 0.08);
+            --defender-border: rgba(249, 115, 22, 0.2);
+            
+            --challenger-color: #10b981; /* Challenger green */
+            --challenger-bg: rgba(16, 185, 129, 0.08);
+            --challenger-border: rgba(16, 185, 129, 0.2);
+            
+            /* Severity Colors */
+            --critical-bg: rgba(239, 68, 68, 0.15);
+            --critical-text: #fca5a5;
+            --critical-border: rgba(239, 68, 68, 0.3);
+            
+            --important-bg: rgba(245, 158, 11, 0.15);
+            --important-text: #fde047;
+            --important-border: rgba(245, 158, 11, 0.3);
+            
+            --minor-bg: rgba(59, 130, 246, 0.15);
+            --minor-text: #93c5fd;
+            --minor-border: rgba(59, 130, 246, 0.3);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0 0 0.5rem 0;
+            letter-spacing: -0.05em;
+            background: linear-gradient(135deg, #a5b4fc, #6366f1, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            font-weight: 300;
+            margin: 0;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            transition: border-color 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(79, 70, 229, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background-color: rgba(9, 13, 22, 0.7);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            box-sizing: border-box;
+            line-height: 1.5;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .file-dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s, background-color 0.3s;
+            background-color: rgba(9, 13, 22, 0.4);
+        }
+
+        .file-dropzone:hover {
+            border-color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.03);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-select-btn {
+            background-color: #1f2937;
+            color: var(--text-primary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .file-select-btn:hover {
+            background-color: #374151;
+            border-color: var(--border-hover);
+        }
+
+        .file-info {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        button.submit-btn {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.4);
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+        }
+
+        button.submit-btn:hover {
+            background-color: var(--primary-hover);
+            box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.6);
+        }
+
+        button.submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        button.submit-btn:disabled {
+            background-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.7;
+            box-shadow: none;
+        }
+
+        .error-banner {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #fca5a5;
+            padding: 1.25rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            display: none;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Result Layout */
+        .result-container {
+            display: none;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .result-meta {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            background-color: rgba(31, 41, 55, 0.5);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        /* Side-by-side Columns */
+        .adversaries-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .adversaries-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .column-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .column-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .column-header .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+        }
+
+        .defender-column .column-header {
+            border-bottom-color: var(--defender-color);
+        }
+
+        .defender-column .column-header .badge {
+            color: var(--defender-color);
+            background-color: var(--defender-bg);
+            border: 1px solid var(--defender-border);
+        }
+
+        .challenger-column .column-header {
+            border-bottom-color: var(--challenger-color);
+        }
+
+        .challenger-column .column-header .badge {
+            color: var(--challenger-color);
+            background-color: var(--challenger-bg);
+            border: 1px solid var(--challenger-border);
+        }
+
+        .proposals-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .no-proposals {
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 2rem;
+            text-align: center;
+            background-color: rgba(17, 24, 39, 0.4);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+        }
+
+        /* Proposal Card Style */
+        .proposal-card {
+            background-color: #161f30;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .proposal-card:hover {
+            transform: translateY(-2px);
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .proposal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .severity-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+        }
+
+        .severity-critical {
+            background-color: var(--critical-bg);
+            color: var(--critical-text);
+            border: 1px solid var(--critical-border);
+        }
+
+        .severity-important {
+            background-color: var(--important-bg);
+            color: var(--important-text);
+            border: 1px solid var(--important-border);
+        }
+
+        .severity-minor {
+            background-color: var(--minor-bg);
+            color: var(--minor-text);
+            border: 1px solid var(--minor-border);
+        }
+
+        .citation {
+            font-size: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            color: var(--text-secondary);
+            background-color: rgba(9, 13, 22, 0.5);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .proposal-text {
+            font-weight: 500;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+
+        .proposal-reasoning {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            border-left: 2px solid rgba(79, 70, 229, 0.4);
+            padding-left: 0.75rem;
+            margin: 0;
+        }
+
+        /* Source Code view style */
+        pre {
+            background-color: rgba(9, 13, 22, 0.7);
+            padding: 1.25rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        /* Spinners & Micro-animations */
+        .spinner {
+            display: inline-block;
+            width: 1.2rem;
+            height: 1.2rem;
+            border: 2.5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 0.6rem;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Crucible</h1>
+            <p class="subtitle">Adversarial Prompt-Hardening Engine — Phase 2</p>
+        </header>
+
+        <div class="card">
+            <div id="errorBanner" class="error-banner"></div>
+
+            <form id="crucibleForm" onsubmit="event.preventDefault();">
+                <div class="form-group">
+                    <label for="promptInput">Antigravity Prompt</label>
+                    <textarea id="promptInput" placeholder="Describe the task or instructions for the agent..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Codebase Folder</label>
+                    <div class="file-dropzone" onclick="document.getElementById('filesInput').click()">
+                        <div class="file-select-btn">Select Folder</div>
+                        <div>or drag folder here</div>
+                        <input type="file" id="filesInput" webkitdirectory directory multiple>
+                        <div id="fileCountInfo" class="file-info">No folder selected</div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="submit-btn">Run Crucible</button>
+            </form>
+        </div>
+
+        <div id="resultContainer" class="result-container">
+            <div class="card">
+                <div class="result-header">
+                    <div class="result-title">Crucible Run Results</div>
+                    <div class="result-meta">
+                        <strong>Session ID:</strong> <span id="resSessionId"></span>
+                    </div>
+                </div>
+
+                <div class="adversaries-grid">
+                    <!-- Defender Column -->
+                    <div class="defender-column">
+                        <div class="column-header">
+                            <h2>Defender</h2>
+                            <span class="badge">Claude</span>
+                        </div>
+                        <div id="defenderList" class="proposals-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Challenger Column -->
+                    <div class="challenger-column">
+                        <div class="column-header">
+                            <h2>Challenger</h2>
+                            <span class="badge">GPT</span>
+                        </div>
+                        <div id="challengerList" class="proposals-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <label>Original Prompt</label>
+                    <pre id="resPrompt"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const promptInput = document.getElementById('promptInput');
+        const filesInput = document.getElementById('filesInput');
+        const fileCountInfo = document.getElementById('fileCountInfo');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorBanner = document.getElementById('errorBanner');
+        const resultContainer = document.getElementById('resultContainer');
+        const resSessionId = document.getElementById('resSessionId');
+        const defenderList = document.getElementById('defenderList');
+        const challengerList = document.getElementById('challengerList');
+        const resPrompt = document.getElementById('resPrompt');
+
+        // Update file count display
+        filesInput.addEventListener('change', () => {
+            const files = filesInput.files;
+            if (files.length > 0) {
+                fileCountInfo.textContent = `${files.length} file(s) selected from folder`;
+            } else {
+                fileCountInfo.textContent = 'No folder selected';
+            }
+        });
+
+        // Submit form handler
+        submitBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            // Clear previous states
+            errorBanner.style.display = 'none';
+            errorBanner.textContent = '';
+            resultContainer.style.display = 'none';
+
+            const promptValue = promptInput.value.trim();
+            const files = filesInput.files;
+
+            // Simple client-side validation
+            if (!promptValue) {
+                showError('The prompt cannot be empty');
+                return;
+            }
+            if (files.length === 0) {
+                showError('No files uploaded');
+                return;
+            }
+
+            // Set loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span>Engaging Adversaries...';
+
+            const formData = new FormData();
+            formData.append('prompt', promptValue);
+            for (let i = 0; i < files.length; i++) {
+                const path = files[i].webkitRelativePath || files[i].name;
+                formData.append('files', files[i], path);
+            }
+
+            try {
+                const response = await fetch('/api/sessions', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.error || 'An unexpected error occurred.');
+                } else {
+                    // Populate and display result
+                    resSessionId.textContent = data.session_id;
+                    resPrompt.textContent = data.prompt;
+                    
+                    // Render defender proposals
+                    renderProposals(defenderList, data.defender_response.proposals);
+                    
+                    // Render challenger proposals
+                    renderProposals(challengerList, data.challenger_response.proposals);
+
+                    resultContainer.style.display = 'flex';
+                    resultContainer.scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (err) {
+                showError('Failed to communicate with the server. Make sure the backend is running and environment keys are loaded.');
+            } finally {
+                // Reset submit button state
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Run Crucible';
+            }
+        });
+
+        function renderProposals(container, proposals) {
+            container.innerHTML = '';
+            
+            if (!proposals || proposals.length === 0) {
+                container.innerHTML = '<div class="no-proposals">No proposals generated by this adversary.</div>';
+                return;
+            }
+
+            proposals.forEach(prop => {
+                const card = document.createElement('div');
+                card.className = 'proposal-card';
+                
+                const topDiv = document.createElement('div');
+                topDiv.className = 'proposal-top';
+                
+                const severity = prop.severity ? prop.severity.toLowerCase() : 'minor';
+                const sevSpan = document.createElement('span');
+                sevSpan.className = `severity-tag severity-${severity}`;
+                sevSpan.textContent = severity;
+                
+                const citSpan = document.createElement('span');
+                citSpan.className = 'citation';
+                citSpan.textContent = prop.groundednessCitation || 'General';
+                citSpan.title = prop.groundednessCitation || 'General';
+                
+                topDiv.appendChild(sevSpan);
+                topDiv.appendChild(citSpan);
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'proposal-text';
+                textDiv.textContent = prop.text;
+                
+                const reasonP = document.createElement('p');
+                reasonP.className = 'proposal-reasoning';
+                reasonP.textContent = prop.reasoning || 'No reasoning details provided.';
+                
+                card.appendChild(topDiv);
+                card.appendChild(textDiv);
+                card.appendChild(reasonP);
+                
+                container.appendChild(card);
+            });
+        }
+
+        function showError(msg) {
+            errorBanner.textContent = msg;
+            errorBanner.style.display = 'block';
+            errorBanner.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
