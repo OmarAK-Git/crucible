@@ -249,6 +249,8 @@ The adversaries determine the application's purpose by reading the README, the s
 
 ### Phase 2 — Adversaries and Personas
 
+**Phase Transition Status:** Phase 1 was successfully completed and gate-verified. We are now in Phase 2. Features that were excluded in Phase 1 (GPT integration, personas, anti-sycophancy) are now actively built in this phase, maintaining compliance with the atomic build rules.
+
 **Goal:** Both adversaries running with their personas and the anti-sycophancy protocol, but in parallel-only mode (no debate yet, no scoring). Proves the LLM contracts work.
 
 **Build:**
