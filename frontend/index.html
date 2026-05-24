@@ -1084,6 +1084,11 @@
             formData.append('prompt', promptValue);
             for (let i = 0; i < files.length; i++) {
                 const path = files[i].webkitRelativePath || files[i].name;
+                const parts = path.split(/[/\\]/);
+                const isIgnored = parts.some(part => 
+                    ['.git', 'node_modules', '__pycache__', '.venv', 'dist', 'build'].includes(part)
+                );
+                if (isIgnored) continue;
                 formData.append('files', files[i], path);
             }
             const questionsModeValue = document.querySelector('input[name="questionsMode"]:checked').value;
