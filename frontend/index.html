@@ -1086,7 +1086,7 @@
                 const path = files[i].webkitRelativePath || files[i].name;
                 const parts = path.split(/[/\\]/);
                 const isIgnored = parts.some(part => 
-                    ['.git', 'node_modules', '__pycache__', '.venv', 'dist', 'build'].includes(part)
+                    ['.git', 'node_modules', '__pycache__', '.venv', 'venv', 'env', 'dist', 'build', '.next', 'out', '.ipynb_checkpoints'].includes(part)
                 );
                 if (isIgnored) continue;
                 formData.append('files', files[i], path);

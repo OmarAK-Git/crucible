@@ -3,7 +3,7 @@ import hashlib
 from pathlib import Path
 from fastapi import UploadFile
 
-IGNORE_DIRS = {".git", "node_modules", "__pycache__", ".venv", "dist", "build"}
+IGNORE_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv", "env", "dist", "build", ".next", "out", ".ipynb_checkpoints"}
 MAX_TOTAL_SIZE = 50 * 1024 * 1024
 MAX_FILE_SIZE = 1 * 1024 * 1024
 KNOWN_BINARIES = {".png", ".jpg", ".jpeg", ".gif", ".pdf", ".zip", ".tar", ".gz", ".exe", ".bin", ".so", ".dylib", ".dll"}
@@ -19,6 +19,9 @@ async def extract_and_read(temp_dir: Path, upload_files: list[UploadFile]) -> li
     total_size = 0
     
     for uf in upload_files:
+        parts = Path(uf.filename).parts
+        if any(part in IGNORE_DIRS for part in parts):
+            continue
         safe_filename = Path(uf.filename).name
         file_path = temp_dir / safe_filename
         file_path.parent.mkdir(parents=True, exist_ok=True)
