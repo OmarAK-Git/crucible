@@ -1,0 +1,560 @@
+{
+  "original_prompt": "add user authentication",
+  "winner": "challenger",
+  "defender_score": 0.0,
+  "challenger_score": 102.2,
+  "termination_reason": "Loop completed",
+  "final_prompt": "Implement JWT-based authentication in app.py using Flask-JWT-Extended. Keep GET / (root path) public. Protect the existing GET /data by requiring a valid Bearer access token in the Authorization header, and do not change the JSON payload returned by GET /data; only gate it behind auth.\n\nAdd a minimal in-memory user store and password hashing in app.py. Use werkzeug.security\u2019s generate_password_hash and check_password_hash. Seed a users dict, for example: {\"admin\": generate_password_hash(\"change-me\")}. Do not introduce a database.\n\nAdd POST /auth/login that:\n- Requires Content-Type: application/json.\n- Accepts a JSON body with non-empty string fields \"username\" and \"password\".\n- On malformed input, returns 400 with JSON: {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}\n- Verifies credentials against the in-memory user store using check_password_hash.\n- On invalid credentials, returns 401 with JSON: {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}}, and includes a WWW-Authenticate: Bearer header.\n- On success, issues JWTs and returns JSON including an access_token and a refresh_token.\n\nAdd POST /auth/refresh that accepts a valid refresh token and returns a new access token. Token lifetimes: access tokens expire in 15 minutes; refresh tokens expire in 30 days. Support two delivery methods for the refresh token:\n- Authorization header: Authorization: Bearer <refresh_token>. Use @jwt_required(refresh=True) for header-based tokens.\n- Request body: JSON with Content-Type: application/json and a non-empty string field \"refresh_token\". For this body-based path, manually call decode_token on the provided token and explicitly verify that the token is valid, not expired, and of type \"refresh\".\nIf the JSON body is missing/invalid or Content-Type is not application/json for the body-based path, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. For missing/invalid/expired/wrong-type tokens from either source, return 401 with {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}}.\n\nStandardize error handling and status codes for all new endpoints:\n- All new endpoints return JSON.\n- For invalid or missing credentials/tokens, return 401 with {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}}.\n- For malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}.\n- Include a WWW-Authenticate: Bearer header on 401 responses from /auth/login failures.\n\nNormalize JWT error responses from Flask-JWT-Extended by registering error handlers so missing/invalid/expired tokens return status 401 with the standardized JSON and Content-Type application/json. Use:\n- @jwt.unauthorized_loader\n- @jwt.invalid_token_loader\n- @jwt.expired_token_loader\nEnsure GET /data without Authorization triggers a 401 that matches the specified schema.\n\nConfiguration and secret handling:\n- Import os and read JWT_SECRET_KEY from the environment. Check for JWT_SECRET_KEY at application startup (module import time) and raise a RuntimeError before app.run if it is missing, to fail fast. Do not hardcode secrets.\n- Replace app.run(debug=True) with reading FLASK_DEBUG from the environment. Do not rely on distutils.util.strtobool. Instead, parse with a small inline parser, e.g., debug = os.getenv(\"FLASK_DEBUG\", \"false\").strip().lower() in (\"1\", \"true\", \"yes\", \"on\"); then app.run(debug=debug).\n\nDependencies:\n- Add flask-jwt-extended (>=4.6,<5) to requirements.txt. Use werkzeug.security for hashing (no extra dependency).\n- Add flask-cors (>=4,<5) to requirements.txt. In app.py, enable CORS only if the ALLOWED_ORIGINS environment variable is set. Parse ALLOWED_ORIGINS as a comma-separated list and apply CORS to /auth/* and /data only. If ALLOWED_ORIGINS is not set, do not import or initialize CORS. Document ALLOWED_ORIGINS (optional) in the README.\n- If a requirements file does not exist, create one and include Flask as well. Document pip install -r requirements.txt in the README.\n\nScope: Make all changes in app.py only; do not introduce blueprints or additional modules.\n\nDocumentation: Update the README with environment variables (JWT_SECRET_KEY, FLASK_DEBUG, and ALLOWED_ORIGINS if used), setup steps, how to run, example credentials (e.g., admin/change-me), and the cURL examples below.\n\nAcceptance criteria (examples):\n1) GET /data without Authorization returns 401 JSON error.\n2) POST /auth/login with {\"username\":\"admin\",\"password\":\"change-me\"} returns 200 with {\"access_token\": \"...\", \"refresh_token\": \"...\"}.\n3) GET /data with Authorization: Bearer <access_token> returns 200 and the same JSON body as before.\n4) POST /auth/refresh with a valid refresh token returns 200 and a new access_token.\n5) POST /auth/refresh with Content-Type: application/json and body {\"refresh_token\":\"<refresh>\"} returns 200 with a new access_token. Missing/malformed JSON yields 400 BAD_REQUEST; an invalid/expired or non-refresh token yields 401 UNAUTHORIZED with the standardized JSON error.",
+  "rounds": [
+    {
+      "number": 1,
+      "defender_turn": {
+        "summary": "Round 1 initial proposals",
+        "opponent_scores": [],
+        "new_proposals": [
+          {
+            "id": "D-R1-P1",
+            "adversary": "defender",
+            "text": "Specify which authentication method to implement: JWT tokens, session-based authentication, OAuth2, API keys, or Basic Auth. Each requires different implementation patterns and dependencies.",
+            "severity": "critical",
+            "groundednessCitation": "app.py: Flask application with no existing auth infrastructure or dependency imports",
+            "reasoning": "The prompt is completely unexecutable as written. 'Authentication' encompasses dozens of approaches. The codebase shows a bare Flask app with no auth dependencies installed (no Flask-Login, Flask-JWT-Extended, etc.). I cannot choose an implementation strategy without explicit direction, as each choice has different security implications, performance characteristics, and integration requirements."
+          },
+          {
+            "id": "D-R1-P2",
+            "adversary": "defender",
+            "text": "Define which routes require authentication. Currently /data and / are both unprotected. Specify if all routes should be protected, only /data, or if new protected routes should be created.",
+            "severity": "critical",
+            "groundednessCitation": "app.py lines 6-12: Two unprotected routes with no authentication decorators or middleware",
+            "reasoning": "Without knowing the scope, I cannot write working code. Do I add decorators to existing routes? Create new protected endpoints? Implement middleware that affects all routes? The current routes have no authentication hooks, and modifying them without specification risks breaking existing functionality or implementing the wrong security model."
+          },
+          {
+            "id": "D-R1-P3",
+            "adversary": "defender",
+            "text": "Specify user storage mechanism: database (SQLite/PostgreSQL/MySQL), in-memory dictionary, external service, or file-based. Include whether user registration is needed or if users should be pre-seeded.",
+            "severity": "critical",
+            "groundednessCitation": "app.py: No database imports, no ORM, no user model classes, no storage layer",
+            "reasoning": "Authentication requires user lookup. The codebase has zero persistence layer. I cannot implement authentication without knowing where user credentials live. Each storage choice requires different dependencies and setup: SQLAlchemy for databases, Redis for caching, external API clients for third-party services. 'Add authentication' without storage specification is like 'add a door' without specifying what building material to use."
+          },
+          {
+            "id": "D-R1-P4",
+            "adversary": "defender",
+            "text": "Specify password handling requirements: hashing algorithm (bcrypt, argon2, PBKDF2), salt rounds/complexity parameters, and whether password reset/change functionality is required.",
+            "severity": "critical",
+            "groundednessCitation": "original spec and app.py: No security dependencies or password handling imports",
+            "reasoning": "This is a security-critical decision I cannot make autonomously. Using weak hashing or storing plaintext passwords would be a severe security vulnerability. The codebase has no cryptography libraries installed. I need explicit direction on security requirements to install correct dependencies and implement proper password verification."
+          },
+          {
+            "id": "D-R1-P5",
+            "adversary": "defender",
+            "text": "Define authentication response behavior: what should protected routes return when authentication fails (401 with JSON error, redirect to login page, custom error handler), and what user data should be accessible after successful authentication (user ID only, full user object, custom claims).",
+            "severity": "important",
+            "groundednessCitation": "app.py lines 9-11: Current /data route returns simple JSON with no error handling patterns",
+            "reasoning": "The existing code has no error handling pattern established. I need to know the expected contract for auth failures to implement consistent error responses. Similarly, without knowing what authenticated user data should be available to route handlers, I cannot design the decorator or middleware interface correctly."
+          },
+          {
+            "id": "D-R1-P6",
+            "adversary": "defender",
+            "text": "Specify if authentication should include authorization/role-based access control, or if it's only identity verification. If roles are needed, define the role model (admin/user, custom roles, permission sets).",
+            "severity": "important",
+            "groundednessCitation": "original spec: 'authentication' mentioned without authorization context",
+            "reasoning": "Authentication (who you are) and authorization (what you can do) are often conflated but require different implementations. If roles are needed, the data model, middleware, and route decorators must be designed differently from simple identity-only authentication. Implementing pure authentication now and adding authorization later would require significant refactoring."
+          },
+          {
+            "id": "D-R1-P7",
+            "adversary": "defender",
+            "text": "Specify token/session expiration policy: session duration, whether refresh tokens are needed, idle timeout behavior, and whether concurrent sessions from same user are allowed.",
+            "severity": "important",
+            "groundednessCitation": "original spec: no lifecycle management specified",
+            "reasoning": "Session management is integral to authentication implementation, not an afterthought. The choice between short-lived tokens with refresh logic versus long-lived sessions affects the entire authentication flow, logout implementation, and security model. I cannot implement a working system without these parameters."
+          },
+          {
+            "id": "D-R1-P8",
+            "adversary": "defender",
+            "text": "Define testing requirements: should the implementation include unit tests for auth logic, integration tests for protected routes, or test fixtures with mock users?",
+            "severity": "minor",
+            "groundednessCitation": "app.py: No test files in corpus, no testing framework imports",
+            "reasoning": "Authentication is security-critical functionality that should be tested, but without direction I don't know if tests are in scope for this task. Including tests affects implementation time and may require additional dependencies (pytest, unittest, factory patterns for test users)."
+          }
+        ],
+        "disagreements": []
+      },
+      "challenger_turn": {
+        "summary": "Round 1 initial proposals",
+        "opponent_scores": [],
+        "new_proposals": [
+          {
+            "id": "C-R1-P1",
+            "adversary": "challenger",
+            "text": "Replace the vague request with: \"Implement JWT-based authentication in app.py using Flask-JWT-Extended. Add POST /auth/login that accepts JSON {\"username\": \"...\", \"password\": \"...\"}, issues a JWT access token on success, and protect the existing GET /data by requiring a valid Bearer token in the Authorization header. Keep GET / public. Do not change the JSON payload returned by GET /data; only gate it behind auth.\"",
+            "severity": "critical",
+            "groundednessCitation": "app.py:get_data",
+            "reasoning": "The current prompt is non-actionable. This specifies the auth mechanism, exact endpoints to modify/add, and preserves existing behavior of /data aside from protection."
+          },
+          {
+            "id": "C-R1-P2",
+            "adversary": "challenger",
+            "text": "Define a minimal user store and password hashing: \"Use werkzeug.security's generate_password_hash/check_password_hash. Seed an in-memory users dict in app.py, e.g., {\"admin\": generate_password_hash(\"change-me\")}. Do not introduce a database for this task.\"",
+            "severity": "critical",
+            "groundednessCitation": "original spec",
+            "reasoning": "Authentication requires a user source and hashing policy. Without specifying storage and hashing, implementation choices may be insecure or inconsistent."
+          },
+          {
+            "id": "C-R1-P3",
+            "adversary": "challenger",
+            "text": "Add configuration and secret handling: \"Read JWT_SECRET_KEY from the environment and fail fast if missing. Do not hardcode secrets. Import os and configure app.config['JWT_SECRET_KEY'] accordingly. Replace app.run(debug=True) with reading FLASK_DEBUG from env (default False).\"",
+            "severity": "critical",
+            "groundednessCitation": "app.py:app.run(debug=True)",
+            "reasoning": "Hardcoded debug=True is unsafe and missing secret management will lead to insecure or non-reproducible setups."
+          },
+          {
+            "id": "C-R1-P4",
+            "adversary": "challenger",
+            "text": "Token settings and refresh: \"Access tokens expire in 15 minutes. Implement POST /auth/refresh that accepts a valid refresh token and returns a new access token. Configure refresh tokens to expire in 30 days.\"",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "Specifying expiry and refresh behavior avoids ad-hoc defaults and ensures a complete auth flow suitable for APIs."
+          },
+          {
+            "id": "C-R1-P5",
+            "adversary": "challenger",
+            "text": "Standardize error handling and status codes: \"All new endpoints return JSON. For invalid or missing credentials/tokens, return 401 with body {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}}. For malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. Include WWW-Authenticate header on 401 from /auth/login failures.\"",
+            "severity": "important",
+            "groundednessCitation": "app.py:get_data",
+            "reasoning": "The existing /data returns JSON; consistent structured error responses and correct status codes are necessary for clients to integrate reliably."
+          },
+          {
+            "id": "C-R1-P6",
+            "adversary": "challenger",
+            "text": "Dependencies: \"Add flask-jwt-extended (>=4.6,<5) to requirements.txt. Use werkzeug.security for hashing (no extra dependency). If a requirements file does not exist, create one and include Flask as well. Document pip install -r requirements.txt in the README.\"",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "The new auth relies on external libraries; without clear dependency specification the implementation will fail to run."
+          },
+          {
+            "id": "C-R1-P7",
+            "adversary": "challenger",
+            "text": "Acceptance criteria with cURL examples: \"1) GET /data without Authorization returns 401 JSON error. 2) POST /auth/login with {\"username\":\"admin\",\"password\":\"change-me\"} returns 200 with {\"access_token\": \"...\", \"refresh_token\": \"...\"}. 3) GET /data with Authorization: Bearer <access_token> returns 200 and the same JSON body as before. 4) POST /auth/refresh with valid refresh token returns 200 and new access_token.\"",
+            "severity": "important",
+            "groundednessCitation": "app.py:get_data",
+            "reasoning": "Explicit, testable outcomes ensure the feature works and prevents regressions to the existing /data response."
+          },
+          {
+            "id": "C-R1-P8",
+            "adversary": "challenger",
+            "text": "Scope and file placement: \"Make all changes in app.py only; do not introduce blueprints or additional modules for this task to keep the change minimal and directly tied to the current code layout.\"",
+            "severity": "minor",
+            "groundednessCitation": "app.py",
+            "reasoning": "The current app is a single-file Flask app; constraining scope avoids unnecessary refactors that complicate review."
+          },
+          {
+            "id": "C-R1-P9",
+            "adversary": "challenger",
+            "text": "CORS (conditional): \"If this API is called from a browser, add flask-cors and enable CORS for /auth/* and /data, restricting origins via an ALLOWED_ORIGINS environment variable. Otherwise, omit CORS.\"",
+            "severity": "minor",
+            "groundednessCitation": "original spec",
+            "reasoning": "Calling from browsers requires CORS; making it conditional prevents overexposure while documenting necessary configuration."
+          },
+          {
+            "id": "C-R1-P10",
+            "adversary": "challenger",
+            "text": "Documentation: \"Update README with environment variables (JWT_SECRET_KEY, FLASK_DEBUG[, ALLOWED_ORIGINS if used]), setup steps, how to run, example credentials, and the cURL examples from acceptance criteria.\"",
+            "severity": "minor",
+            "groundednessCitation": "original spec",
+            "reasoning": "Clear docs make the prompt executable for others and reduce setup friction."
+          }
+        ],
+        "disagreements": []
+      },
+      "working_prompt_after": "add user authentication\n\n### Refinements\n\n#### Critical Severity:\n- Specify which authentication method to implement: JWT tokens, session-based authentication, OAuth2, API keys, or Basic Auth. Each requires different implementation patterns and dependencies.\n- Define which routes require authentication. Currently /data and / are both unprotected. Specify if all routes should be protected, only /data, or if new protected routes should be created.\n- Specify user storage mechanism: database (SQLite/PostgreSQL/MySQL), in-memory dictionary, external service, or file-based. Include whether user registration is needed or if users should be pre-seeded.\n- Specify password handling requirements: hashing algorithm (bcrypt, argon2, PBKDF2), salt rounds/complexity parameters, and whether password reset/change functionality is required.\n- Replace the vague request with: \"Implement JWT-based authentication in app.py using Flask-JWT-Extended. Add POST /auth/login that accepts JSON {\"username\": \"...\", \"password\": \"...\"}, issues a JWT access token on success, and protect the existing GET /data by requiring a valid Bearer token in the Authorization header. Keep GET / public. Do not change the JSON payload returned by GET /data; only gate it behind auth.\"\n- Define a minimal user store and password hashing: \"Use werkzeug.security's generate_password_hash/check_password_hash. Seed an in-memory users dict in app.py, e.g., {\"admin\": generate_password_hash(\"change-me\")}. Do not introduce a database for this task.\"\n- Add configuration and secret handling: \"Read JWT_SECRET_KEY from the environment and fail fast if missing. Do not hardcode secrets. Import os and configure app.config['JWT_SECRET_KEY'] accordingly. Replace app.run(debug=True) with reading FLASK_DEBUG from env (default False).\"\n\n#### Important Severity:\n- Define authentication response behavior: what should protected routes return when authentication fails (401 with JSON error, redirect to login page, custom error handler), and what user data should be accessible after successful authentication (user ID only, full user object, custom claims).\n- Specify if authentication should include authorization/role-based access control, or if it's only identity verification. If roles are needed, define the role model (admin/user, custom roles, permission sets).\n- Specify token/session expiration policy: session duration, whether refresh tokens are needed, idle timeout behavior, and whether concurrent sessions from same user are allowed.\n- Token settings and refresh: \"Access tokens expire in 15 minutes. Implement POST /auth/refresh that accepts a valid refresh token and returns a new access token. Configure refresh tokens to expire in 30 days.\"\n- Standardize error handling and status codes: \"All new endpoints return JSON. For invalid or missing credentials/tokens, return 401 with body {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}}. For malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. Include WWW-Authenticate header on 401 from /auth/login failures.\"\n- Dependencies: \"Add flask-jwt-extended (>=4.6,<5) to requirements.txt. Use werkzeug.security for hashing (no extra dependency). If a requirements file does not exist, create one and include Flask as well. Document pip install -r requirements.txt in the README.\"\n- Acceptance criteria with cURL examples: \"1) GET /data without Authorization returns 401 JSON error. 2) POST /auth/login with {\"username\":\"admin\",\"password\":\"change-me\"} returns 200 with {\"access_token\": \"...\", \"refresh_token\": \"...\"}. 3) GET /data with Authorization: Bearer <access_token> returns 200 and the same JSON body as before. 4) POST /auth/refresh with valid refresh token returns 200 and new access_token.\"\n\n#### Minor Severity:\n- Define testing requirements: should the implementation include unit tests for auth logic, integration tests for protected routes, or test fixtures with mock users?\n- Scope and file placement: \"Make all changes in app.py only; do not introduce blueprints or additional modules for this task to keep the change minimal and directly tied to the current code layout.\"\n- CORS (conditional): \"If this API is called from a browser, add flask-cors and enable CORS for /auth/* and /data, restricting origins via an ALLOWED_ORIGINS environment variable. Otherwise, omit CORS.\"\n- Documentation: \"Update README with environment variables (JWT_SECRET_KEY, FLASK_DEBUG[, ALLOWED_ORIGINS if used]), setup steps, how to run, example credentials, and the cURL examples from acceptance criteria.\"",
+      "scores_this_round": {
+        "defender": 0.0,
+        "challenger": 0.0
+      }
+    },
+    {
+      "number": 2,
+      "defender_turn": {
+        "summary": "Round 2: All opponent proposals are well-grounded and actionable. I accept them all with no modifications needed. No new proposals\u2014the working prompt is now complete and executable.",
+        "opponent_scores": [
+          {
+            "proposal_id": "C-R1-P1",
+            "verdict": "accept",
+            "reasoning": "This transforms the vague 'add user authentication' into concrete, actionable instructions. It specifies the exact library (Flask-JWT-Extended), the endpoint to add (POST /auth/login), the payload format, what to protect (GET /data), and what to leave public (GET /). Directly addresses the non-executability of the original prompt. Grounded in app.py structure.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P2",
+            "verdict": "accept",
+            "reasoning": "Critical security specification. Defines the user storage mechanism (in-memory dict), hashing library (werkzeug.security), and provides concrete initialization pattern. Without this, an implementer would face critical security decisions with no guidance. Avoids database complexity while remaining executable.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P3",
+            "verdict": "accept",
+            "reasoning": "Addresses two production-critical gaps: secret management (JWT_SECRET_KEY from environment, fail-fast on missing) and the hardcoded debug=True in app.py line 11. Both are security issues and both are grounded in the existing codebase. The fail-fast requirement makes this testable.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P4",
+            "verdict": "accept",
+            "reasoning": "Specifies token lifecycle policy (15min access, 30day refresh) and adds the refresh endpoint. This completes the auth flow beyond just login. The severity is appropriate\u2014without expiry policy, tokens could be permanent (security issue) or expire too quickly (usability issue). Important, not critical, because basic auth can work without refresh.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P5",
+            "verdict": "accept",
+            "reasoning": "Standardizes error contract for new endpoints. The existing GET /data returns JSON (app.py:10), so consistency requires JSON errors. The structured error format and WWW-Authenticate header are HTTP standards. This prevents implementers from returning inconsistent error formats or wrong status codes.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P6",
+            "verdict": "accept",
+            "reasoning": "Dependencies must be explicit for the prompt to be executable. Flask-JWT-Extended is not in the current codebase. The version constraint (>=4.6,<5) prevents breaking changes. Instructing to create requirements.txt if missing and document installation removes ambiguity. Werkzeug is already a Flask dependency, correctly noted as no extra dep.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P7",
+            "verdict": "accept",
+            "reasoning": "Provides testable acceptance criteria with concrete cURL commands. Each criterion maps to a requirement from earlier proposals. This allows verification that the implementation matches the spec and prevents regression of the existing GET /data JSON response. The 'same JSON body as before' requirement is directly grounded in app.py:10.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P8",
+            "verdict": "accept",
+            "reasoning": "Scope constraint grounded in current single-file structure (app.py is 11 lines, all in one file). Prevents premature refactoring into blueprints or modules, which would complicate the change and review. Keeps the diff focused on auth addition, not restructuring.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P9",
+            "verdict": "accept",
+            "reasoning": "Conditional specification\u2014only adds CORS if needed for browser clients. Provides the correct mechanism (flask-cors) and configuration pattern (ALLOWED_ORIGINS env var) while explicitly allowing omission if not needed. Prevents over-engineering while documenting the path forward if CORS becomes necessary.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P10",
+            "verdict": "accept",
+            "reasoning": "Documentation requirement ensures the prompt is complete. Lists all environment variables introduced by earlier proposals (JWT_SECRET_KEY, FLASK_DEBUG, conditional ALLOWED_ORIGINS), setup steps, and the acceptance criteria cURL examples. Without this, the implementation would be incomplete\u2014runnable code but no instructions for running it.",
+            "modification": null
+          }
+        ],
+        "new_proposals": [],
+        "disagreements": []
+      },
+      "challenger_turn": {
+        "summary": "No opponent proposals to score. Proposing a critical fix to the route-auth contradiction, plus important clarifications for JWT error handling, refresh token delivery, and login input validation. Also minor clarifications for FLASK_DEBUG parsing and conditional CORS dependency.",
+        "opponent_scores": [],
+        "new_proposals": [
+          {
+            "id": "C-R2-P1",
+            "adversary": "challenger",
+            "text": "Fix contradiction: Clarify route scope of auth. Replace the sentence 'Keep GET / public.' with 'Keep the root endpoint GET / (index) public; do not require authentication on it. Only gate GET /data behind JWT auth.'",
+            "severity": "critical",
+            "groundednessCitation": "app.py: index() defines route '/', get_data() defines route '/data'",
+            "reasoning": "The current instruction simultaneously says to protect GET /data and to keep GET / public, which is ambiguous. The codebase has two routes: '/' and '/data'. We must keep '/' public and protect only '/data' to align with the acceptance criteria that GET /data without Authorization returns 401."
+          },
+          {
+            "id": "C-R2-P2",
+            "adversary": "challenger",
+            "text": "Normalize JWT error responses: Register Flask-JWT-Extended error handlers (@jwt.unauthorized_loader, @jwt.invalid_token_loader, @jwt.expired_token_loader) so that missing/invalid/expired tokens return status 401 with JSON body {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}} and Content-Type application/json. Ensure GET /data without Authorization triggers these handlers and matches the specified schema.",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "The spec mandates standardized JSON errors and 401 for invalid/missing credentials/tokens. Flask-JWT-Extended otherwise returns its own shapes. Explicit handlers are required to meet the specified error schema and acceptance criteria."
+          },
+          {
+            "id": "C-R2-P3",
+            "adversary": "challenger",
+            "text": "Clarify refresh token delivery: Require POST /auth/refresh to read the refresh token from the Authorization header using the Bearer scheme (Authorization: Bearer <refresh_token>) and decorate the endpoint with @jwt_required(refresh=True). On missing/invalid/expired refresh tokens, return 401 with the standardized JSON error.",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "The spec requires a refresh endpoint but does not state how the refresh token is supplied. Flask-JWT-Extended conventionally uses the Authorization Bearer header with @jwt_required(refresh=True); specifying this removes ambiguity and aligns behaviors with the rest of the auth flow."
+          },
+          {
+            "id": "C-R2-P4",
+            "adversary": "challenger",
+            "text": "Harden /auth/login input handling: Require Content-Type: application/json and validate that the JSON body includes non-empty string fields 'username' and 'password'. On malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. On invalid credentials, return 401 with {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}} and include a WWW-Authenticate: Bearer header.",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "The spec defines 400 for malformed input and 401 for invalid credentials with a WWW-Authenticate header. Explicitly stating JSON/content-type validation and field checks avoids inconsistent behaviors and ensures predictable error responses."
+          },
+          {
+            "id": "C-R2-P5",
+            "adversary": "challenger",
+            "text": "Environment flag parsing: When replacing app.run(debug=True), parse FLASK_DEBUG into a boolean by treating '1', 'true', 't', or 'yes' (case-insensitive) as True; otherwise False.",
+            "severity": "minor",
+            "groundednessCitation": "original spec",
+            "reasoning": "The spec requires reading FLASK_DEBUG from the environment. This clarifies expected parsing behavior and avoids accidental truthiness of non-empty strings like '0'."
+          },
+          {
+            "id": "C-R2-P6",
+            "adversary": "challenger",
+            "text": "Conditional dependency: If CORS is enabled per the conditional requirement, add flask-cors (>=4,<5) to requirements.txt and mention it in the README; otherwise, do not add it.",
+            "severity": "minor",
+            "groundednessCitation": "original spec",
+            "reasoning": "The spec conditionally introduces CORS but the dependencies section does not explicitly mention adding flask-cors to requirements. This aligns requirements.txt and README with the optional CORS feature."
+          }
+        ],
+        "disagreements": []
+      },
+      "working_prompt_after": "add user authentication\n\n### Refinements\n\n#### Critical Severity:\n- Replace the vague request with: \"Implement JWT-based authentication in app.py using Flask-JWT-Extended. Add POST /auth/login that accepts JSON {\"username\": \"...\", \"password\": \"...\"}, issues a JWT access token on success, and protect the existing GET /data by requiring a valid Bearer token in the Authorization header. Keep GET / public. Do not change the JSON payload returned by GET /data; only gate it behind auth.\"\n- Define a minimal user store and password hashing: \"Use werkzeug.security's generate_password_hash/check_password_hash. Seed an in-memory users dict in app.py, e.g., {\"admin\": generate_password_hash(\"change-me\")}. Do not introduce a database for this task.\"\n- Add configuration and secret handling: \"Read JWT_SECRET_KEY from the environment and fail fast if missing. Do not hardcode secrets. Import os and configure app.config['JWT_SECRET_KEY'] accordingly. Replace app.run(debug=True) with reading FLASK_DEBUG from env (default False).\"\n\n#### Important Severity:\n- Token settings and refresh: \"Access tokens expire in 15 minutes. Implement POST /auth/refresh that accepts a valid refresh token and returns a new access token. Configure refresh tokens to expire in 30 days.\"\n- Standardize error handling and status codes: \"All new endpoints return JSON. For invalid or missing credentials/tokens, return 401 with body {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}}. For malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. Include WWW-Authenticate header on 401 from /auth/login failures.\"\n- Dependencies: \"Add flask-jwt-extended (>=4.6,<5) to requirements.txt. Use werkzeug.security for hashing (no extra dependency). If a requirements file does not exist, create one and include Flask as well. Document pip install -r requirements.txt in the README.\"\n- Acceptance criteria with cURL examples: \"1) GET /data without Authorization returns 401 JSON error. 2) POST /auth/login with {\"username\":\"admin\",\"password\":\"change-me\"} returns 200 with {\"access_token\": \"...\", \"refresh_token\": \"...\"}. 3) GET /data with Authorization: Bearer <access_token> returns 200 and the same JSON body as before. 4) POST /auth/refresh with valid refresh token returns 200 and new access_token.\"\n\n#### Minor Severity:\n- Scope and file placement: \"Make all changes in app.py only; do not introduce blueprints or additional modules for this task to keep the change minimal and directly tied to the current code layout.\"\n- CORS (conditional): \"If this API is called from a browser, add flask-cors and enable CORS for /auth/* and /data, restricting origins via an ALLOWED_ORIGINS environment variable. Otherwise, omit CORS.\"\n- Documentation: \"Update README with environment variables (JWT_SECRET_KEY, FLASK_DEBUG[, ALLOWED_ORIGINS if used]), setup steps, how to run, example credentials, and the cURL examples from acceptance criteria.\"",
+      "scores_this_round": {
+        "defender": 0.0,
+        "challenger": 56.0
+      }
+    },
+    {
+      "number": 3,
+      "defender_turn": {
+        "summary": "Round 3: Defender scores opponent proposals. C-R2-P1 is rejected as redundant; the working prompt already distinguishes / and /data. C-R2-P2 is accepted as grounded necessity for standardized error responses. C-R2-P3 is modified to add fallback for body-based token delivery. C-R2-P4 is accepted. C-R2-P5 is modified to use distutils.util.strtobool for robustness. C-R2-P6 is accepted. No new proposals; all critical ambiguities have been addressed.",
+        "opponent_scores": [
+          {
+            "proposal_id": "C-R2-P1",
+            "verdict": "reject",
+            "reasoning": "The working prompt already states 'protect the existing GET /data by requiring a valid Bearer token' and 'Keep GET / public.' The corpus shows two routes: / (index) and /data (get_data). The distinction is already clear. The proposed replacement adds verbosity without resolving any actual ambiguity. The acceptance criteria already require GET /data to return 401 without auth, which implies / remains public.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R2-P2",
+            "verdict": "accept",
+            "reasoning": "Flask-JWT-Extended's default error responses do not match the specified JSON schema. The spec mandates 401 with {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}} for missing/invalid/expired tokens. Registering custom error handlers is the correct implementation path and is grounded in the original spec's error requirements and acceptance criteria.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R2-P3",
+            "verdict": "modify",
+            "reasoning": "The spec does not mandate Bearer header for refresh tokens; it only requires a POST /auth/refresh endpoint that accepts a valid refresh token. While @jwt_required(refresh=True) with Bearer is a sensible default, the spec also returns refresh_token in the login response body, implying clients might send it in the body. The instruction should permit both header and body to avoid breaking clients that use the body pattern.",
+            "modification": "Clarify refresh token delivery: POST /auth/refresh should accept the refresh token either in the Authorization: Bearer <refresh_token> header or as a 'refresh_token' field in the JSON request body. Use @jwt_required(refresh=True) for header-based tokens; for body-based tokens, manually call decode_token. On missing/invalid/expired refresh tokens from either source, return 401 with the standardized JSON error."
+          },
+          {
+            "proposal_id": "C-R2-P4",
+            "verdict": "accept",
+            "reasoning": "The spec defines 400 for malformed input and 401 for invalid credentials with WWW-Authenticate header. The current working prompt does not explicitly require Content-Type or field validation, which leaves room for inconsistent error handling. This proposal grounds the behavior in the spec's error schema and acceptance criteria.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R2-P5",
+            "verdict": "modify",
+            "reasoning": "The proposal correctly identifies the need to parse FLASK_DEBUG into a boolean. However, manually listing truthy strings is fragile and non-standard. Python's distutils.util.strtobool is the idiomatic parser for this use case and handles edge cases like 'on', 'off', '0', '1', etc.",
+            "modification": "Environment flag parsing: When replacing app.run(debug=True), parse FLASK_DEBUG into a boolean using distutils.util.strtobool (from distutils.util import strtobool; debug = bool(strtobool(os.getenv('FLASK_DEBUG', 'False')))). This handles common variations like '1', 'true', 'yes', '0', 'false', 'no' (case-insensitive)."
+          },
+          {
+            "proposal_id": "C-R2-P6",
+            "verdict": "accept",
+            "reasoning": "The working prompt introduces CORS conditionally but does not explicitly list flask-cors in the dependencies instruction. This proposal correctly ties the dependency to the conditional feature and ensures requirements.txt and README are consistent.",
+            "modification": null
+          }
+        ],
+        "new_proposals": [],
+        "disagreements": []
+      },
+      "challenger_turn": {
+        "summary": "No opponent proposals to score. Proposed clarifications: explicitly state that GET / refers to the root path, tighten /auth/refresh body-mode validation and enforce token type 'refresh', specify fail-fast timing for missing JWT_SECRET_KEY, make CORS enablement contingent on ALLOWED_ORIGINS presence, and add acceptance criteria for body-based refresh flow.",
+        "opponent_scores": [],
+        "new_proposals": [
+          {
+            "id": "C-R3-P1",
+            "adversary": "challenger",
+            "text": "Clarify the Critical bullet about protected/public routes: change 'Keep GET / public.' to 'Keep GET / (root path) public.' to avoid ambiguity with other GET routes.",
+            "severity": "important",
+            "groundednessCitation": "app.py",
+            "reasoning": "The corpus defines a GET / index route and a GET /data route. The current wording 'Keep GET / public' could be misread as any GET route. Explicitly naming the root path prevents accidentally leaving /data public."
+          },
+          {
+            "id": "C-R3-P2",
+            "adversary": "challenger",
+            "text": "In 'Clarify refresh token delivery', add: 'When the refresh token is supplied in the request body, require Content-Type: application/json and validate that the JSON includes a non-empty string field refresh_token. After decode_token, explicitly verify the token's type is refresh; if the token is missing/invalid/expired or not a refresh token, return 401 with the standardized JSON error. If the body is malformed or Content-Type is not application/json, return 400 BAD_REQUEST with the standardized JSON error.'",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "The spec allows body-based refresh tokens and standardizes 400 vs 401 errors, but does not require verifying the token type or Content-Type for the body path. Without this, an access token could be used to mint a new access token via the body path, which is a security gap."
+          },
+          {
+            "id": "C-R3-P3",
+            "adversary": "challenger",
+            "text": "In 'Add configuration and secret handling', clarify timing: 'Check for JWT_SECRET_KEY at application startup (module import time) and raise a RuntimeError before app.run if it is missing, to fail fast.'",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "The spec says to fail fast if JWT_SECRET_KEY is missing but not when. Making this an early startup check avoids the app starting in a bad state and failing only upon first use of JWT."
+          },
+          {
+            "id": "C-R3-P4",
+            "adversary": "challenger",
+            "text": "In 'CORS (conditional)', define the activation condition precisely: 'Enable CORS only if the ALLOWED_ORIGINS environment variable is set. Parse it as a comma-separated list of origins and apply CORS to /auth/* and /data only. If ALLOWED_ORIGINS is not set, do not add flask-cors to requirements.txt and do not initialize CORS.'",
+            "severity": "minor",
+            "groundednessCitation": "original spec",
+            "reasoning": "The current condition ('If this API is called from a browser') is ambiguous at implementation time. Tying enablement to ALLOWED_ORIGINS already mentioned by the spec removes ambiguity and prevents unnecessary dependency changes."
+          },
+          {
+            "id": "C-R3-P5",
+            "adversary": "challenger",
+            "text": "Extend 'Acceptance criteria with cURL examples' to cover the body-based refresh flow: '5) POST /auth/refresh with Content-Type: application/json and body {\"refresh_token\":\"<refresh>\"} returns 200 with a new access_token. Missing/malformed JSON yields 400 BAD_REQUEST; an invalid/expired or non-refresh token yields 401 UNAUTHORIZED with the standardized JSON error.'",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "The spec allows refresh via header or JSON body but only the header path is tested in acceptance criteria. Adding explicit tests for the body path ensures the implementation validates type and error codes correctly."
+          }
+        ],
+        "disagreements": []
+      },
+      "working_prompt_after": "add user authentication\n\n### Refinements\n\n#### Critical Severity:\n- Replace the vague request with: \"Implement JWT-based authentication in app.py using Flask-JWT-Extended. Add POST /auth/login that accepts JSON {\"username\": \"...\", \"password\": \"...\"}, issues a JWT access token on success, and protect the existing GET /data by requiring a valid Bearer token in the Authorization header. Keep GET / public. Do not change the JSON payload returned by GET /data; only gate it behind auth.\"\n- Define a minimal user store and password hashing: \"Use werkzeug.security's generate_password_hash/check_password_hash. Seed an in-memory users dict in app.py, e.g., {\"admin\": generate_password_hash(\"change-me\")}. Do not introduce a database for this task.\"\n- Add configuration and secret handling: \"Read JWT_SECRET_KEY from the environment and fail fast if missing. Do not hardcode secrets. Import os and configure app.config['JWT_SECRET_KEY'] accordingly. Replace app.run(debug=True) with reading FLASK_DEBUG from env (default False).\"\n\n#### Important Severity:\n- Token settings and refresh: \"Access tokens expire in 15 minutes. Implement POST /auth/refresh that accepts a valid refresh token and returns a new access token. Configure refresh tokens to expire in 30 days.\"\n- Standardize error handling and status codes: \"All new endpoints return JSON. For invalid or missing credentials/tokens, return 401 with body {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}}. For malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. Include WWW-Authenticate header on 401 from /auth/login failures.\"\n- Dependencies: \"Add flask-jwt-extended (>=4.6,<5) to requirements.txt. Use werkzeug.security for hashing (no extra dependency). If a requirements file does not exist, create one and include Flask as well. Document pip install -r requirements.txt in the README.\"\n- Acceptance criteria with cURL examples: \"1) GET /data without Authorization returns 401 JSON error. 2) POST /auth/login with {\"username\":\"admin\",\"password\":\"change-me\"} returns 200 with {\"access_token\": \"...\", \"refresh_token\": \"...\"}. 3) GET /data with Authorization: Bearer <access_token> returns 200 and the same JSON body as before. 4) POST /auth/refresh with valid refresh token returns 200 and new access_token.\"\n- Normalize JWT error responses: Register Flask-JWT-Extended error handlers (@jwt.unauthorized_loader, @jwt.invalid_token_loader, @jwt.expired_token_loader) so that missing/invalid/expired tokens return status 401 with JSON body {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}} and Content-Type application/json. Ensure GET /data without Authorization triggers these handlers and matches the specified schema.\n- Clarify refresh token delivery: POST /auth/refresh should accept the refresh token either in the Authorization: Bearer <refresh_token> header or as a 'refresh_token' field in the JSON request body. Use @jwt_required(refresh=True) for header-based tokens; for body-based tokens, manually call decode_token. On missing/invalid/expired refresh tokens from either source, return 401 with the standardized JSON error.\n- Harden /auth/login input handling: Require Content-Type: application/json and validate that the JSON body includes non-empty string fields 'username' and 'password'. On malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. On invalid credentials, return 401 with {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}} and include a WWW-Authenticate: Bearer header.\n\n#### Minor Severity:\n- Scope and file placement: \"Make all changes in app.py only; do not introduce blueprints or additional modules for this task to keep the change minimal and directly tied to the current code layout.\"\n- CORS (conditional): \"If this API is called from a browser, add flask-cors and enable CORS for /auth/* and /data, restricting origins via an ALLOWED_ORIGINS environment variable. Otherwise, omit CORS.\"\n- Documentation: \"Update README with environment variables (JWT_SECRET_KEY, FLASK_DEBUG[, ALLOWED_ORIGINS if used]), setup steps, how to run, example credentials, and the cURL examples from acceptance criteria.\"\n- Environment flag parsing: When replacing app.run(debug=True), parse FLASK_DEBUG into a boolean using distutils.util.strtobool (from distutils.util import strtobool; debug = bool(strtobool(os.getenv('FLASK_DEBUG', 'False')))). This handles common variations like '1', 'true', 'yes', '0', 'false', 'no' (case-insensitive).\n- Conditional dependency: If CORS is enabled per the conditional requirement, add flask-cors (>=4,<5) to requirements.txt and mention it in the README; otherwise, do not add it.",
+      "scores_this_round": {
+        "defender": 0.0,
+        "challenger": 16.2
+      }
+    },
+    {
+      "number": 4,
+      "defender_turn": {
+        "summary": "Defender Round 4: Scored all opponent proposals. All five proposals address real implementation gaps and should be accepted. No new proposals or disagreements remain.",
+        "opponent_scores": [
+          {
+            "proposal_id": "C-R3-P1",
+            "verdict": "accept",
+            "reasoning": "The corpus shows two distinct GET routes: GET / (index) and GET /data. The phrase 'Keep GET / public' is technically correct but could be misread as 'all GET routes'. Making it 'Keep GET / (root path) public' removes ambiguity for the implementer who must protect /data while leaving index unprotected. This is a real clarity gain.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R3-P2",
+            "verdict": "accept",
+            "reasoning": "The working prompt allows refresh tokens in the body but does not require verifying the token type. Without this, an access token could be decoded and accepted for minting a new access token via the body path, which is a security hole. The proposal also enforces Content-Type: application/json and standardizes error codes (400 for malformed input, 401 for invalid/expired/wrong-type tokens), matching the pattern already established for /auth/login. This is a critical security and consistency fix.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R3-P3",
+            "verdict": "accept",
+            "reasoning": "The working prompt says 'fail fast if missing' but does not specify when. Without timing, an implementer might check the key only when a JWT function is first called, meaning the app starts but fails on first authenticated request. Requiring a startup check (module import time, before app.run) ensures the misconfiguration is caught immediately. This is an actionable improvement.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R3-P4",
+            "verdict": "accept",
+            "reasoning": "The current condition 'If this API is called from a browser' is not testable at implementation time. The implementer cannot know the deployment context. Tying CORS enablement to the presence of ALLOWED_ORIGINS (already in the spec) makes the decision deterministic and aligns with the dependency rule (only add flask-cors if actually used). This removes a decision burden and prevents dependency bloat.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R3-P5",
+            "verdict": "accept",
+            "reasoning": "The working prompt allows two refresh token delivery methods (header and body) but only tests the header path in acceptance criteria. Without explicit body-path tests, an implementer might skip the Content-Type check, token-type verification, or error code logic for the body path. Adding test case 5 ensures the body path is validated against the same standards (400 for malformed, 401 for invalid/expired/wrong-type). This closes a test coverage gap.",
+            "modification": null
+          }
+        ],
+        "new_proposals": [],
+        "disagreements": []
+      },
+      "challenger_turn": {
+        "summary": "No opponent proposals to score. Proposing fixes for a self-contradiction in the refresh endpoint, removal of deprecated distutils usage for FLASK_DEBUG parsing, and resolving the conditional dependency ambiguity for flask-cors.",
+        "opponent_scores": [],
+        "new_proposals": [
+          {
+            "id": "C-R4-P1",
+            "adversary": "challenger",
+            "text": "Replace the 'Clarify refresh token delivery' bullet with: 'POST /auth/refresh must accept a refresh token from either source: (a) Authorization: Bearer <refresh_token> header, or (b) a JSON body field refresh_token with Content-Type: application/json. Do NOT decorate this endpoint with @jwt_required; instead, inside the view: (1) Attempt header-based verification by calling verify_jwt_in_request(optional=True, refresh=True). If a valid refresh token is present in the Authorization header, use get_jwt_identity() and return a new access token (200). If an invalid/expired/malformed header token is present, return 401 UNAUTHORIZED with the standardized JSON error. (2) If no Authorization header token was provided, require Content-Type: application/json and validate that the JSON includes a non-empty string field refresh_token; on malformed/missing JSON return 400 BAD_REQUEST with the standardized JSON error. (3) For the body token, call decode_token(refresh_token) and explicitly verify the token type is refresh and that signature/expiry are valid; on failure, return 401 UNAUTHORIZED with the standardized JSON error. (4) On success (either source), return 200 with a new access_token.'",
+            "severity": "critical",
+            "groundednessCitation": "original spec",
+            "reasoning": "Using @jwt_required(refresh=True) short-circuits requests without an Authorization header, making the body-based refresh path unreachable. The revised instructions allow a single endpoint to support both delivery modes and still conform to the standardized error model."
+          },
+          {
+            "id": "C-R4-P2",
+            "adversary": "challenger",
+            "text": "Revise the 'Environment flag parsing' bullet to avoid distutils: 'When replacing app.run(debug=True), do not rely on distutils.util.strtobool (removed in Python 3.12). Instead, parse FLASK_DEBUG with a small inline parser: debug = os.getenv(\"FLASK_DEBUG\", \"false\").strip().lower() in (\"1\", \"true\", \"yes\", \"on\"); app.run(debug=debug).'",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "distutils is removed in Python 3.12, causing import errors in modern environments. A tiny inline parser keeps the single-file constraint and avoids a brittle dependency."
+          },
+          {
+            "id": "C-R4-P3",
+            "adversary": "challenger",
+            "text": "Resolve the 'Conditional dependency' ambiguity with CORS: replace the two bullets 'CORS (conditional)' and 'Conditional dependency' with: 'Always add flask-cors (>=4,<5) to requirements.txt. In app.py, enable CORS only if the ALLOWED_ORIGINS environment variable is set. Parse ALLOWED_ORIGINS as a comma-separated list and apply CORS to /auth/* and /data only. If ALLOWED_ORIGINS is not set, do not initialize CORS. Document ALLOWED_ORIGINS in the README.'",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "Whether a pip dependency is installed cannot depend on a runtime environment variable. Always including flask-cors in requirements makes builds deterministic while still keeping CORS initialization strictly conditional at runtime as required."
+          }
+        ],
+        "disagreements": []
+      },
+      "working_prompt_after": "add user authentication\n\n### Refinements\n\n#### Critical Severity:\n- Replace the vague request with: \"Implement JWT-based authentication in app.py using Flask-JWT-Extended. Add POST /auth/login that accepts JSON {\"username\": \"...\", \"password\": \"...\"}, issues a JWT access token on success, and protect the existing GET /data by requiring a valid Bearer token in the Authorization header. Keep GET / public. Do not change the JSON payload returned by GET /data; only gate it behind auth.\"\n- Define a minimal user store and password hashing: \"Use werkzeug.security's generate_password_hash/check_password_hash. Seed an in-memory users dict in app.py, e.g., {\"admin\": generate_password_hash(\"change-me\")}. Do not introduce a database for this task.\"\n- Add configuration and secret handling: \"Read JWT_SECRET_KEY from the environment and fail fast if missing. Do not hardcode secrets. Import os and configure app.config['JWT_SECRET_KEY'] accordingly. Replace app.run(debug=True) with reading FLASK_DEBUG from env (default False).\"\n\n#### Important Severity:\n- Token settings and refresh: \"Access tokens expire in 15 minutes. Implement POST /auth/refresh that accepts a valid refresh token and returns a new access token. Configure refresh tokens to expire in 30 days.\"\n- Standardize error handling and status codes: \"All new endpoints return JSON. For invalid or missing credentials/tokens, return 401 with body {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}}. For malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. Include WWW-Authenticate header on 401 from /auth/login failures.\"\n- Dependencies: \"Add flask-jwt-extended (>=4.6,<5) to requirements.txt. Use werkzeug.security for hashing (no extra dependency). If a requirements file does not exist, create one and include Flask as well. Document pip install -r requirements.txt in the README.\"\n- Acceptance criteria with cURL examples: \"1) GET /data without Authorization returns 401 JSON error. 2) POST /auth/login with {\"username\":\"admin\",\"password\":\"change-me\"} returns 200 with {\"access_token\": \"...\", \"refresh_token\": \"...\"}. 3) GET /data with Authorization: Bearer <access_token> returns 200 and the same JSON body as before. 4) POST /auth/refresh with valid refresh token returns 200 and new access_token.\"\n- Normalize JWT error responses: Register Flask-JWT-Extended error handlers (@jwt.unauthorized_loader, @jwt.invalid_token_loader, @jwt.expired_token_loader) so that missing/invalid/expired tokens return status 401 with JSON body {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}} and Content-Type application/json. Ensure GET /data without Authorization triggers these handlers and matches the specified schema.\n- Clarify refresh token delivery: POST /auth/refresh should accept the refresh token either in the Authorization: Bearer <refresh_token> header or as a 'refresh_token' field in the JSON request body. Use @jwt_required(refresh=True) for header-based tokens; for body-based tokens, manually call decode_token. On missing/invalid/expired refresh tokens from either source, return 401 with the standardized JSON error.\n- Harden /auth/login input handling: Require Content-Type: application/json and validate that the JSON body includes non-empty string fields 'username' and 'password'. On malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. On invalid credentials, return 401 with {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}} and include a WWW-Authenticate: Bearer header.\n- Clarify the Critical bullet about protected/public routes: change 'Keep GET / public.' to 'Keep GET / (root path) public.' to avoid ambiguity with other GET routes.\n- In 'Clarify refresh token delivery', add: 'When the refresh token is supplied in the request body, require Content-Type: application/json and validate that the JSON includes a non-empty string field refresh_token. After decode_token, explicitly verify the token's type is refresh; if the token is missing/invalid/expired or not a refresh token, return 401 with the standardized JSON error. If the body is malformed or Content-Type is not application/json, return 400 BAD_REQUEST with the standardized JSON error.'\n- In 'Add configuration and secret handling', clarify timing: 'Check for JWT_SECRET_KEY at application startup (module import time) and raise a RuntimeError before app.run if it is missing, to fail fast.'\n- Extend 'Acceptance criteria with cURL examples' to cover the body-based refresh flow: '5) POST /auth/refresh with Content-Type: application/json and body {\"refresh_token\":\"<refresh>\"} returns 200 with a new access_token. Missing/malformed JSON yields 400 BAD_REQUEST; an invalid/expired or non-refresh token yields 401 UNAUTHORIZED with the standardized JSON error.'\n\n#### Minor Severity:\n- Scope and file placement: \"Make all changes in app.py only; do not introduce blueprints or additional modules for this task to keep the change minimal and directly tied to the current code layout.\"\n- CORS (conditional): \"If this API is called from a browser, add flask-cors and enable CORS for /auth/* and /data, restricting origins via an ALLOWED_ORIGINS environment variable. Otherwise, omit CORS.\"\n- Documentation: \"Update README with environment variables (JWT_SECRET_KEY, FLASK_DEBUG[, ALLOWED_ORIGINS if used]), setup steps, how to run, example credentials, and the cURL examples from acceptance criteria.\"\n- Environment flag parsing: When replacing app.run(debug=True), parse FLASK_DEBUG into a boolean using distutils.util.strtobool (from distutils.util import strtobool; debug = bool(strtobool(os.getenv('FLASK_DEBUG', 'False')))). This handles common variations like '1', 'true', 'yes', '0', 'false', 'no' (case-insensitive).\n- Conditional dependency: If CORS is enabled per the conditional requirement, add flask-cors (>=4,<5) to requirements.txt and mention it in the README; otherwise, do not add it.\n- In 'CORS (conditional)', define the activation condition precisely: 'Enable CORS only if the ALLOWED_ORIGINS environment variable is set. Parse it as a comma-separated list of origins and apply CORS to /auth/* and /data only. If ALLOWED_ORIGINS is not set, do not add flask-cors to requirements.txt and do not initialize CORS.'",
+      "scores_this_round": {
+        "defender": 0.0,
+        "challenger": 22.0
+      }
+    },
+    {
+      "number": 5,
+      "defender_turn": {
+        "summary": "Round 5: Evaluating opponent's three proposals and checking for remaining gaps.",
+        "opponent_scores": [
+          {
+            "proposal_id": "C-R4-P1",
+            "verdict": "reject",
+            "reasoning": "This proposal dramatically increases implementation complexity by requiring manual token verification, dual-path logic, and custom error handling that duplicates Flask-JWT-Extended's built-in capabilities. The original 'Clarify refresh token delivery' bullet already specifies body-based tokens with decode_token and explicit type verification, which is executable. The claim that @jwt_required(refresh=True) 'short-circuits' body tokens is incorrect\u2014the implementer can write TWO endpoints (/auth/refresh-header with @jwt_required(refresh=True) and /auth/refresh-body with manual decode_token) or a single endpoint that checks request.headers first, then falls back to request.json. The proposal does not cite any line in app.py that forces a single endpoint, and the original spec does not mandate a single /auth/refresh URL. Accepting this would burden the implementer with untested manual JWT verification code instead of leveraging the library's tested decorators.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R4-P2",
+            "verdict": "accept",
+            "reasoning": "Grounded in Python 3.12 deprecation (distutils removed). The inline parser is trivial, meets the single-file constraint, and eliminates a real breakage risk. This is a concrete improvement.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R4-P3",
+            "verdict": "modify",
+            "reasoning": "The logic is sound\u2014pip dependencies must be deterministic\u2014but the wording 'Always add flask-cors' conflicts with the existing conditional requirement that says 'Enable CORS only if...'. The modification should preserve the runtime conditionality while fixing the requirements.txt ambiguity.",
+            "modification": "Replace the two bullets 'CORS (conditional)' and 'Conditional dependency' with: 'Add flask-cors (>=4,<5) to requirements.txt. In app.py, enable CORS only if the ALLOWED_ORIGINS environment variable is set. Parse ALLOWED_ORIGINS as a comma-separated list and apply CORS to /auth/* and /data only. If ALLOWED_ORIGINS is not set, do not import or initialize CORS. Document ALLOWED_ORIGINS (optional) in the README.'"
+          }
+        ],
+        "new_proposals": [],
+        "disagreements": []
+      },
+      "challenger_turn": {
+        "summary": "No opponent proposals to score. Resolving internal contradictions (CORS and distutils parsing), aligning critical login instruction to return both tokens, adding explicit JWT expiry config keys, and expanding acceptance criteria for login error paths.",
+        "opponent_scores": [],
+        "new_proposals": [
+          {
+            "id": "C-R5-P1",
+            "adversary": "challenger",
+            "text": "Remove the following Minor bullets as they conflict with and are superseded by the Important replacement: 1) 'CORS (conditional): If this API is called from a browser, add flask-cors and enable CORS for /auth/* and /data, restricting origins via an ALLOWED_ORIGINS environment variable. Otherwise, omit CORS.' 2) 'Conditional dependency: If CORS is enabled per the conditional requirement, add flask-cors (>=4,<5) to requirements.txt and mention it in the README; otherwise, do not add it.' 3) 'In \"CORS (conditional)\", define the activation condition precisely: Enable CORS only if the ALLOWED_ORIGINS environment variable is set. Parse it as a comma-separated list of origins and apply CORS to /auth/* and /data only. If ALLOWED_ORIGINS is not set, do not add flask-cors to requirements.txt and do not initialize CORS.' Keep only the Important bullet: 'Add flask-cors (>=4,<5) to requirements.txt. In app.py, enable CORS only if the ALLOWED_ORIGINS environment variable is set. Parse ALLOWED_ORIGINS as a comma-separated list and apply CORS to /auth/* and /data only. If ALLOWED_ORIGINS is not set, do not import or initialize CORS. Document ALLOWED_ORIGINS (optional) in the README.'",
+            "severity": "critical",
+            "groundednessCitation": "original spec",
+            "reasoning": "The Important bullet explicitly replaces the prior CORS guidance, but the Minor bullets still instruct opposite behavior (conditionally adding the dependency and different enablement rules). Keeping both creates conflicting requirements and implementer confusion."
+          },
+          {
+            "id": "C-R5-P2",
+            "adversary": "challenger",
+            "text": "Remove the Minor bullet 'Environment flag parsing: When replacing app.run(debug=True), parse FLASK_DEBUG into a boolean using distutils.util.strtobool...' because it is superseded by the Important bullet that forbids distutils and provides the inline parser. Retain only: 'When replacing app.run(debug=True), do not rely on distutils.util.strtobool (removed in Python 3.12). Instead, parse FLASK_DEBUG with a small inline parser: debug = os.getenv(\"FLASK_DEBUG\", \"false\").strip().lower() in (\"1\", \"true\", \"yes\", \"on\"); app.run(debug=debug).'",
+            "severity": "critical",
+            "groundednessCitation": "original spec",
+            "reasoning": "The Important refinement explicitly overrides the Minor guidance due to Python 3.12 deprecations. Leaving both creates a direct contradiction on how to parse FLASK_DEBUG."
+          },
+          {
+            "id": "C-R5-P3",
+            "adversary": "challenger",
+            "text": "Amend the Critical authentication bullet to explicitly return both tokens on login and reflect the clarified public route wording: 'Implement JWT-based authentication in app.py using Flask-JWT-Extended. Add POST /auth/login that accepts JSON {\"username\": \"...\", \"password\": \"...\"}, and on success returns both an access_token and a refresh_token. Protect the existing GET /data by requiring a valid Bearer access token in the Authorization header. Keep GET / (root path) public. Do not change the JSON payload returned by GET /data; only gate it behind auth.'",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "Other bullets and acceptance criteria require a refresh flow and specify that /auth/login returns both access and refresh tokens. Updating the Critical instruction removes ambiguity and aligns with the stated acceptance criteria and refresh endpoint requirements."
+          },
+          {
+            "id": "C-R5-P4",
+            "adversary": "challenger",
+            "text": "Make the token expiry configuration explicit: 'Configure app.config[\"JWT_ACCESS_TOKEN_EXPIRES\"] = timedelta(minutes=15) and app.config[\"JWT_REFRESH_TOKEN_EXPIRES\"] = timedelta(days=30) (from datetime import timedelta) to enforce the specified lifetimes.'",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "The prompt mandates specific expirations but does not specify how to apply them. Explicit config keys reduce ambiguity and implementation variance within Flask-JWT-Extended."
+          },
+          {
+            "id": "C-R5-P5",
+            "adversary": "challenger",
+            "text": "Extend 'Acceptance criteria with cURL examples' with login error paths: '6) POST /auth/login with {\"username\":\"admin\",\"password\":\"wrong\"} returns 401 with {\"error\":{\"code\":\"UNAUTHORIZED\",\"message\":\"...\"}} and includes a WWW-Authenticate: Bearer header. 7) POST /auth/login without Content-Type: application/json or with missing/empty username/password returns 400 with {\"error\":{\"code\":\"BAD_REQUEST\",\"message\":\"...\"}}.'",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "The prompt standardizes error handling and hardens login input, but the acceptance criteria currently omit these negative-path checks. Adding them ensures verifiable compliance and reduces ambiguity."
+          }
+        ],
+        "disagreements": []
+      },
+      "working_prompt_after": "add user authentication\n\n### Refinements\n\n#### Critical Severity:\n- Replace the vague request with: \"Implement JWT-based authentication in app.py using Flask-JWT-Extended. Add POST /auth/login that accepts JSON {\"username\": \"...\", \"password\": \"...\"}, issues a JWT access token on success, and protect the existing GET /data by requiring a valid Bearer token in the Authorization header. Keep GET / public. Do not change the JSON payload returned by GET /data; only gate it behind auth.\"\n- Define a minimal user store and password hashing: \"Use werkzeug.security's generate_password_hash/check_password_hash. Seed an in-memory users dict in app.py, e.g., {\"admin\": generate_password_hash(\"change-me\")}. Do not introduce a database for this task.\"\n- Add configuration and secret handling: \"Read JWT_SECRET_KEY from the environment and fail fast if missing. Do not hardcode secrets. Import os and configure app.config['JWT_SECRET_KEY'] accordingly. Replace app.run(debug=True) with reading FLASK_DEBUG from env (default False).\"\n\n#### Important Severity:\n- Token settings and refresh: \"Access tokens expire in 15 minutes. Implement POST /auth/refresh that accepts a valid refresh token and returns a new access token. Configure refresh tokens to expire in 30 days.\"\n- Standardize error handling and status codes: \"All new endpoints return JSON. For invalid or missing credentials/tokens, return 401 with body {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}}. For malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. Include WWW-Authenticate header on 401 from /auth/login failures.\"\n- Dependencies: \"Add flask-jwt-extended (>=4.6,<5) to requirements.txt. Use werkzeug.security for hashing (no extra dependency). If a requirements file does not exist, create one and include Flask as well. Document pip install -r requirements.txt in the README.\"\n- Acceptance criteria with cURL examples: \"1) GET /data without Authorization returns 401 JSON error. 2) POST /auth/login with {\"username\":\"admin\",\"password\":\"change-me\"} returns 200 with {\"access_token\": \"...\", \"refresh_token\": \"...\"}. 3) GET /data with Authorization: Bearer <access_token> returns 200 and the same JSON body as before. 4) POST /auth/refresh with valid refresh token returns 200 and new access_token.\"\n- Normalize JWT error responses: Register Flask-JWT-Extended error handlers (@jwt.unauthorized_loader, @jwt.invalid_token_loader, @jwt.expired_token_loader) so that missing/invalid/expired tokens return status 401 with JSON body {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}} and Content-Type application/json. Ensure GET /data without Authorization triggers these handlers and matches the specified schema.\n- Clarify refresh token delivery: POST /auth/refresh should accept the refresh token either in the Authorization: Bearer <refresh_token> header or as a 'refresh_token' field in the JSON request body. Use @jwt_required(refresh=True) for header-based tokens; for body-based tokens, manually call decode_token. On missing/invalid/expired refresh tokens from either source, return 401 with the standardized JSON error.\n- Harden /auth/login input handling: Require Content-Type: application/json and validate that the JSON body includes non-empty string fields 'username' and 'password'. On malformed input, return 400 with {\"error\": {\"code\": \"BAD_REQUEST\", \"message\": \"...\"}}. On invalid credentials, return 401 with {\"error\": {\"code\": \"UNAUTHORIZED\", \"message\": \"...\"}} and include a WWW-Authenticate: Bearer header.\n- Clarify the Critical bullet about protected/public routes: change 'Keep GET / public.' to 'Keep GET / (root path) public.' to avoid ambiguity with other GET routes.\n- In 'Clarify refresh token delivery', add: 'When the refresh token is supplied in the request body, require Content-Type: application/json and validate that the JSON includes a non-empty string field refresh_token. After decode_token, explicitly verify the token's type is refresh; if the token is missing/invalid/expired or not a refresh token, return 401 with the standardized JSON error. If the body is malformed or Content-Type is not application/json, return 400 BAD_REQUEST with the standardized JSON error.'\n- In 'Add configuration and secret handling', clarify timing: 'Check for JWT_SECRET_KEY at application startup (module import time) and raise a RuntimeError before app.run if it is missing, to fail fast.'\n- Extend 'Acceptance criteria with cURL examples' to cover the body-based refresh flow: '5) POST /auth/refresh with Content-Type: application/json and body {\"refresh_token\":\"<refresh>\"} returns 200 with a new access_token. Missing/malformed JSON yields 400 BAD_REQUEST; an invalid/expired or non-refresh token yields 401 UNAUTHORIZED with the standardized JSON error.'\n- Revise the 'Environment flag parsing' bullet to avoid distutils: 'When replacing app.run(debug=True), do not rely on distutils.util.strtobool (removed in Python 3.12). Instead, parse FLASK_DEBUG with a small inline parser: debug = os.getenv(\"FLASK_DEBUG\", \"false\").strip().lower() in (\"1\", \"true\", \"yes\", \"on\"); app.run(debug=debug).'\n- Replace the two bullets 'CORS (conditional)' and 'Conditional dependency' with: 'Add flask-cors (>=4,<5) to requirements.txt. In app.py, enable CORS only if the ALLOWED_ORIGINS environment variable is set. Parse ALLOWED_ORIGINS as a comma-separated list and apply CORS to /auth/* and /data only. If ALLOWED_ORIGINS is not set, do not import or initialize CORS. Document ALLOWED_ORIGINS (optional) in the README.'\n\n#### Minor Severity:\n- Scope and file placement: \"Make all changes in app.py only; do not introduce blueprints or additional modules for this task to keep the change minimal and directly tied to the current code layout.\"\n- CORS (conditional): \"If this API is called from a browser, add flask-cors and enable CORS for /auth/* and /data, restricting origins via an ALLOWED_ORIGINS environment variable. Otherwise, omit CORS.\"\n- Documentation: \"Update README with environment variables (JWT_SECRET_KEY, FLASK_DEBUG[, ALLOWED_ORIGINS if used]), setup steps, how to run, example credentials, and the cURL examples from acceptance criteria.\"\n- Environment flag parsing: When replacing app.run(debug=True), parse FLASK_DEBUG into a boolean using distutils.util.strtobool (from distutils.util import strtobool; debug = bool(strtobool(os.getenv('FLASK_DEBUG', 'False')))). This handles common variations like '1', 'true', 'yes', '0', 'false', 'no' (case-insensitive).\n- Conditional dependency: If CORS is enabled per the conditional requirement, add flask-cors (>=4,<5) to requirements.txt and mention it in the README; otherwise, do not add it.\n- In 'CORS (conditional)', define the activation condition precisely: 'Enable CORS only if the ALLOWED_ORIGINS environment variable is set. Parse it as a comma-separated list of origins and apply CORS to /auth/* and /data only. If ALLOWED_ORIGINS is not set, do not add flask-cors to requirements.txt and do not initialize CORS.'",
+      "scores_this_round": {
+        "defender": 0.0,
+        "challenger": 8.0
+      }
+    }
+  ]
+}

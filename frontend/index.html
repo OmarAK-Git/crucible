@@ -97,7 +97,7 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 2.5rem;
+            padding: 2rem;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(8px);
             transition: border-color 0.3s;
@@ -108,7 +108,7 @@
         }
 
         .form-group {
-            margin-bottom: 1.75rem;
+            margin-bottom: 1.5rem;
             display: flex;
             flex-direction: column;
             gap: 0.6rem;
@@ -116,7 +116,7 @@
 
         label {
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -124,7 +124,7 @@
 
         textarea {
             width: 100%;
-            min-height: 140px;
+            min-height: 120px;
             padding: 1rem;
             border-radius: 10px;
             border: 1px solid var(--border);
@@ -147,7 +147,7 @@
         .file-dropzone {
             border: 2px dashed var(--border);
             border-radius: 12px;
-            padding: 2.5rem;
+            padding: 2rem;
             text-align: center;
             cursor: pointer;
             transition: border-color 0.3s, background-color 0.3s;
@@ -166,11 +166,11 @@
         .file-select-btn {
             background-color: #1f2937;
             color: var(--text-primary);
-            padding: 0.6rem 1.2rem;
+            padding: 0.5rem 1.2rem;
             border-radius: 8px;
             font-weight: 500;
             display: inline-block;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             border: 1px solid var(--border);
             cursor: pointer;
             transition: background-color 0.2s, border-color 0.2s;
@@ -182,9 +182,9 @@
         }
 
         .file-info {
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            margin-top: 0.5rem;
+            margin-top: 0.3rem;
         }
 
         button.submit-btn {
@@ -204,10 +204,6 @@
         button.submit-btn:hover {
             background-color: var(--primary-hover);
             box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.6);
-        }
-
-        button.submit-btn:active {
-            transform: scale(0.98);
         }
 
         button.submit-btn:disabled {
@@ -230,41 +226,256 @@
             line-height: 1.5;
         }
 
-        /* Result Layout */
-        .result-container {
+        /* Active Sessions list */
+        .active-sessions-card {
             display: none;
-            flex-direction: column;
-            gap: 2rem;
+            border-color: var(--primary-hover);
         }
 
-        .result-header {
+        .active-sessions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .active-session-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background-color: rgba(17, 24, 39, 0.5);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+        }
+
+        .active-session-item span {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .active-session-item .prompt-preview {
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .resume-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
+        }
+
+        .resume-btn:hover {
+            background-color: #059669;
+        }
+
+        /* Live Scoreboard */
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.8), rgba(9, 13, 22, 0.9));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .score-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .score-box:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+
+        .score-box .score-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .score-box.defender .score-label {
+            color: var(--defender-color);
+        }
+
+        .score-box.challenger .score-label {
+            color: var(--challenger-color);
+        }
+
+        .score-box .score-val {
+            font-size: 2.25rem;
+            font-weight: 800;
+        }
+
+        /* Live Logger */
+        .log-card {
+            margin-bottom: 1.5rem;
+            background-color: rgba(9, 13, 22, 0.9);
+        }
+
+        .log-console {
+            height: 180px;
+            overflow-y: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #10b981; /* neon green */
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            padding: 0.5rem;
+        }
+
+        .log-line {
+            white-space: pre-wrap;
+        }
+
+        .log-line.system { color: #818cf8; }
+        .log-line.error { color: #fca5a5; }
+
+        /* Debating Rounds View */
+        .rounds-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .round-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .round-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            background-color: rgba(17, 24, 39, 0.6);
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
             border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
+        }
+
+        .round-header:hover {
+            background-color: rgba(31, 41, 55, 0.4);
+        }
+
+        .round-title-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .round-number-badge {
+            font-size: 0.9rem;
+            font-weight: 700;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        .round-scores-summary {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .round-scores-summary .def-score { color: var(--defender-color); }
+        .round-scores-summary .chal-score { color: var(--challenger-color); }
+
+        .round-collapse-icon {
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .round-card.collapsed .round-collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .round-card.collapsed .round-body {
+            display: none;
+        }
+
+        .round-body {
+            padding: 1.5rem;
+        }
+
+        .turn-summary-block {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: rgba(31, 41, 55, 0.3);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .turn-summary-block strong {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: var(--text-primary);
+        }
+
+        /* Opponent Scores Section */
+        .opponent-scores-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
             margin-bottom: 1rem;
         }
 
-        .result-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .result-meta {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            background-color: rgba(31, 41, 55, 0.5);
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
+        .score-verdict-item {
+            background-color: rgba(9, 13, 22, 0.5);
             border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.85rem;
         }
 
-        /* Side-by-side Columns */
+        .score-verdict-item .verdict-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.3rem;
+        }
+
+        .verdict-badge {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        .verdict-accept { background-color: rgba(16, 185, 129, 0.15); color: #a7f3d0; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .verdict-modify { background-color: rgba(245, 158, 11, 0.15); color: #fef08a; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .verdict-reject { background-color: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* Proposal list styling */
         .adversaries-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
         @media (max-width: 768px) {
@@ -273,127 +484,61 @@
             }
         }
 
-        .column-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .column-header h2 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: -0.02em;
-        }
-
-        .column-header .badge {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 0.25rem 0.6rem;
-            border-radius: 12px;
-        }
-
-        .defender-column .column-header {
-            border-bottom-color: var(--defender-color);
-        }
-
-        .defender-column .column-header .badge {
-            color: var(--defender-color);
-            background-color: var(--defender-bg);
-            border: 1px solid var(--defender-border);
-        }
-
-        .challenger-column .column-header {
-            border-bottom-color: var(--challenger-color);
-        }
-
-        .challenger-column .column-header .badge {
-            color: var(--challenger-color);
-            background-color: var(--challenger-bg);
-            border: 1px solid var(--challenger-border);
-        }
-
-        .proposals-list {
+        .adversary-column-box {
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
 
-        .no-proposals {
-            color: var(--text-muted);
-            font-style: italic;
-            padding: 2rem;
-            text-align: center;
-            background-color: rgba(17, 24, 39, 0.4);
-            border: 1px dashed var(--border);
-            border-radius: 12px;
+        .adversary-column-box h3 {
+            font-size: 1.1rem;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        /* Proposal Card Style */
+        .adversary-column-box.defender h3 { color: var(--defender-color); }
+        .adversary-column-box.challenger h3 { color: var(--challenger-color); }
+
         .proposal-card {
             background-color: #161f30;
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.25rem;
-            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            border-radius: 8px;
+            padding: 1rem;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .proposal-card:hover {
-            transform: translateY(-2px);
-            border-color: #3b82f6;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            gap: 0.5rem;
         }
 
         .proposal-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
         }
 
         .severity-tag {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            padding: 0.2rem 0.5rem;
-            border-radius: 6px;
-        }
-
-        .severity-critical {
-            background-color: var(--critical-bg);
-            color: var(--critical-text);
-            border: 1px solid var(--critical-border);
-        }
-
-        .severity-important {
-            background-color: var(--important-bg);
-            color: var(--important-text);
-            border: 1px solid var(--important-border);
-        }
-
-        .severity-minor {
-            background-color: var(--minor-bg);
-            color: var(--minor-text);
-            border: 1px solid var(--minor-border);
-        }
-
-        .citation {
-            font-size: 0.75rem;
-            font-family: 'Fira Code', monospace;
-            color: var(--text-secondary);
-            background-color: rgba(9, 13, 22, 0.5);
             padding: 0.15rem 0.4rem;
             border-radius: 4px;
-            max-width: 180px;
+        }
+
+        .severity-critical { background-color: var(--critical-bg); color: var(--critical-text); border: 1px solid var(--critical-border); }
+        .severity-important { background-color: var(--important-bg); color: var(--important-text); border: 1px solid var(--important-border); }
+        .severity-minor { background-color: var(--minor-bg); color: var(--minor-text); border: 1px solid var(--minor-border); }
+
+        .citation {
+            font-size: 0.7rem;
+            font-family: 'Fira Code', monospace;
+            color: var(--text-secondary);
+            background-color: rgba(9, 13, 22, 0.4);
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            max-width: 140px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -401,21 +546,54 @@
 
         .proposal-text {
             font-weight: 500;
-            font-size: 0.95rem;
-            line-height: 1.4;
+            font-size: 0.9rem;
             color: var(--text-primary);
+            line-height: 1.35;
         }
 
         .proposal-reasoning {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
-            line-height: 1.4;
-            border-left: 2px solid rgba(79, 70, 229, 0.4);
-            padding-left: 0.75rem;
+            line-height: 1.35;
+            border-left: 2px solid rgba(79, 70, 229, 0.3);
+            padding-left: 0.5rem;
             margin: 0;
         }
 
-        /* Source Code view style */
+        /* Final Synthesis Prompt */
+        .synthesis-card {
+            border-color: #10b981;
+        }
+
+        .synthesis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .synthesis-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        .copy-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
         pre {
             background-color: rgba(9, 13, 22, 0.7);
             padding: 1.25rem;
@@ -428,23 +606,130 @@
             font-size: 0.9rem;
             color: #cbd5e1;
             line-height: 1.5;
+            margin: 0;
         }
 
-        /* Spinners & Micro-animations */
+        /* Spinners */
         .spinner {
             display: inline-block;
-            width: 1.2rem;
-            height: 1.2rem;
-            border: 2.5px solid rgba(255, 255, 255, 0.2);
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 0.8s linear infinite;
-            margin-right: 0.6rem;
+            margin-right: 0.5rem;
             vertical-align: middle;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        /* Questions Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(9, 13, 22, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 25px var(--primary-glow);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modalSlide 0.3s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(17, 24, 39, 0.6);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            background-color: rgba(17, 24, 39, 0.6);
+        }
+
+        .question-item {
+            background-color: rgba(9, 13, 22, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .question-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border-left: 3px solid var(--primary);
+            padding-left: 0.75rem;
+        }
+
+        .question-default-box {
+            font-size: 0.8rem;
+            background-color: rgba(79, 70, 229, 0.05);
+            border: 1px dashed var(--border);
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: var(--text-secondary);
         }
     </style>
 </head>
@@ -452,10 +737,19 @@
     <div class="container">
         <header>
             <h1>Crucible</h1>
-            <p class="subtitle">Adversarial Prompt-Hardening Engine — Phase 2</p>
+            <p class="subtitle">Adversarial Prompt-Hardening Engine — Phase 3</p>
         </header>
 
-        <div class="card">
+        <!-- Incoming from Tumbler Section -->
+        <div id="tumblerHandoffsCard" style="background-color: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 1rem 0; color: #f9fafb;">Incoming from Tumbler</h2>
+            <div id="handoffsList" style="display: flex; flex-direction: column; gap: 1rem;">
+                <p style="color: #9ca3af; font-size: 0.95rem; margin: 0;">Loading incoming handoffs...</p>
+            </div>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="card" id="formCard">
             <div id="errorBanner" class="error-banner"></div>
 
             <form id="crucibleForm" onsubmit="event.preventDefault();">
@@ -474,49 +768,87 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label>Questions Mode</label>
+                    <div style="display: flex; gap: 1.5rem; margin-top: 0.25rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; text-transform: none; font-weight: normal; cursor: pointer; color: var(--text-primary);">
+                            <input type="radio" name="questionsMode" value="off" checked style="accent-color: var(--primary);">
+                            Ask me questions
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; text-transform: none; font-weight: normal; cursor: pointer; color: var(--text-primary);">
+                            <input type="radio" name="questionsMode" value="on" style="accent-color: var(--primary);">
+                            Auto-accept defaults
+                        </label>
+                    </div>
+                </div>
+
                 <button type="submit" id="submitBtn" class="submit-btn">Run Crucible</button>
             </form>
         </div>
 
-        <div id="resultContainer" class="result-container">
-            <div class="card">
-                <div class="result-header">
-                    <div class="result-title">Crucible Run Results</div>
-                    <div class="result-meta">
-                        <strong>Session ID:</strong> <span id="resSessionId"></span>
-                    </div>
+        <!-- Active Running Sessions Card -->
+        <div class="card active-sessions-card" id="activeSessionsCard">
+            <label>Active Resumable Sessions</label>
+            <div class="active-sessions-list" id="activeSessionsList">
+                <!-- Dynamically loaded active sessions -->
+            </div>
+        </div>
+
+        <!-- Results / Live Debate Container -->
+        <div id="resultContainer" class="result-container" style="display: none;">
+            
+            <!-- Scoreboard -->
+            <div class="scoreboard">
+                <div class="score-box defender">
+                    <div class="score-label">Claude — The Defender</div>
+                    <div class="score-val" id="defenderScoreVal">0.0</div>
                 </div>
-
-                <div class="adversaries-grid">
-                    <!-- Defender Column -->
-                    <div class="defender-column">
-                        <div class="column-header">
-                            <h2>Defender</h2>
-                            <span class="badge">Claude</span>
-                        </div>
-                        <div id="defenderList" class="proposals-list">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- Challenger Column -->
-                    <div class="challenger-column">
-                        <div class="column-header">
-                            <h2>Challenger</h2>
-                            <span class="badge">GPT</span>
-                        </div>
-                        <div id="challengerList" class="proposals-list">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
+                <div class="score-box">
+                    <div class="score-label">Session Status</div>
+                    <div class="score-val" style="font-size: 1.5rem; font-weight: 700; color: #818cf8;" id="sessionStatusVal">Debating</div>
+                </div>
+                <div class="score-box challenger">
+                    <div class="score-label">GPT — The Challenger</div>
+                    <div class="score-val" id="challengerScoreVal">0.0</div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="form-group">
-                    <label>Original Prompt</label>
-                    <pre id="resPrompt"></pre>
+            <!-- Console Log Card -->
+            <div class="card log-card">
+                <label>Real-Time Debate Log</label>
+                <div class="log-console" id="logConsole">
+                    <!-- Live logs pop up here -->
                 </div>
+            </div>
+
+            <!-- Final Synthesized Prompt Card -->
+            <div class="card synthesis-card" id="synthesisCard" style="display: none;">
+                <div class="synthesis-header">
+                    <div class="synthesis-title">Hardened Antigravity Prompt</div>
+                    <button class="copy-btn" id="copyPromptBtn">Copy to Clipboard</button>
+                </div>
+                <pre id="finalPromptText"></pre>
+            </div>
+
+            <!-- Sequential Debate Rounds Card -->
+            <div class="rounds-container" id="roundsContainer">
+                <!-- Each round card generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Questions Modal Overlay -->
+    <div id="questionsModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span class="modal-title" id="questionsModalTitle">Questions for the Human</span>
+            </div>
+            <div class="modal-body" id="questionsModalBody">
+                <!-- Dynamically populated questions -->
+            </div>
+            <div class="modal-footer">
+                <div id="modalError" style="color: #fca5a5; font-size: 0.9rem; flex-grow: 1; align-self: center; display: none;"></div>
+                <button class="copy-btn" id="submitAnswersBtn">Submit Answers</button>
             </div>
         </div>
     </div>
@@ -528,12 +860,188 @@
         const submitBtn = document.getElementById('submitBtn');
         const errorBanner = document.getElementById('errorBanner');
         const resultContainer = document.getElementById('resultContainer');
-        const resSessionId = document.getElementById('resSessionId');
-        const defenderList = document.getElementById('defenderList');
-        const challengerList = document.getElementById('challengerList');
-        const resPrompt = document.getElementById('resPrompt');
+        
+        const activeSessionsCard = document.getElementById('activeSessionsCard');
+        const activeSessionsList = document.getElementById('activeSessionsList');
+        
+        const defenderScoreVal = document.getElementById('defenderScoreVal');
+        const challengerScoreVal = document.getElementById('challengerScoreVal');
+        const sessionStatusVal = document.getElementById('sessionStatusVal');
+        const logConsole = document.getElementById('logConsole');
+        
+        const roundsContainer = document.getElementById('roundsContainer');
+        const synthesisCard = document.getElementById('synthesisCard');
+        const finalPromptText = document.getElementById('finalPromptText');
+        const copyPromptBtn = document.getElementById('copyPromptBtn');
 
-        // Update file count display
+        let roundsData = []; // Cache for rounds DOM objects
+        let currentRoundsModel = {}; // Store raw rounds info by number
+        let currentSessionId = null;
+
+        // Fetch active sessions and incoming handoffs on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadActiveSessions();
+            loadIncomingHandoffs();
+        });
+
+        async function loadIncomingHandoffs() {
+            const handoffsList = document.getElementById('handoffsList');
+            try {
+                const res = await fetch('/api/handoffs/incoming');
+                if (res.ok) {
+                    const handoffs = await res.json();
+                    handoffsList.innerHTML = '';
+                    if (handoffs.length > 0) {
+                        handoffs.forEach(h => {
+                            const card = document.createElement('div');
+                            card.style.border = '1px solid #1f2937';
+                            card.style.background = '#111827';
+                            card.style.borderRadius = '8px';
+                            card.style.padding = '1rem';
+                            card.style.display = 'flex';
+                            card.style.flexDirection = 'column';
+                            card.style.gap = '0.75rem';
+                            
+                            const top = document.createElement('div');
+                            top.style.display = 'flex';
+                            top.style.justifyContent = 'space-between';
+                            top.style.fontSize = '0.85rem';
+                            top.style.color = '#9ca3af';
+                            top.innerHTML = `
+                                <span>Session: <strong>${escapeHtml(h.tumbler_session_id.substring(0, 8))}...</strong></span>
+                                <span>Verdict: <strong style="color: #10b981;">${escapeHtml(h.tumbler_verdict)}</strong></span>
+                                <span>Created: <strong>${new Date(h.created_at).toLocaleString()}</strong></span>
+                            `;
+                            
+                            const label = document.createElement('label');
+                            label.textContent = "What feature do you want to harden?";
+                            label.style.fontSize = '0.85rem';
+                            label.style.fontWeight = '600';
+                            label.style.color = '#9ca3af';
+                            
+                            const textarea = document.createElement('textarea');
+                            textarea.className = 'handoff-prompt';
+                            textarea.placeholder = 'e.g. Add user log-in functionality...';
+                            textarea.style.minHeight = '60px';
+                            textarea.style.padding = '0.5rem';
+                            textarea.style.borderRadius = '6px';
+                            textarea.style.border = '1px solid #374151';
+                            textarea.style.background = '#090d16';
+                            textarea.style.color = '#f9fafb';
+                            textarea.style.fontSize = '0.9rem';
+                            
+                            const btn = document.createElement('button');
+                            btn.textContent = 'Run Crucible on this';
+                            btn.style.alignSelf = 'flex-start';
+                            btn.style.padding = '0.5rem 1rem';
+                            btn.style.backgroundColor = '#10b981';
+                            btn.style.border = 'none';
+                            btn.style.borderRadius = '6px';
+                            btn.style.color = '#ffffff';
+                            btn.style.fontWeight = '600';
+                            btn.style.cursor = 'pointer';
+                            btn.style.transition = 'background-color 0.2s';
+                            
+                            btn.onmouseover = () => { btn.style.backgroundColor = '#059669'; };
+                            btn.onmouseout = () => { btn.style.backgroundColor = '#10b981'; };
+                            
+                            btn.onclick = async () => {
+                                const promptVal = textarea.value.trim();
+                                if (!promptVal) {
+                                    alert("Please describe the feature you want to harden.");
+                                    return;
+                                }
+                                
+                                btn.disabled = true;
+                                btn.textContent = 'Launching...';
+                                
+                                try {
+                                    const questionsModeValue = document.querySelector('input[name="questionsMode"]:checked').value;
+                                    const sessionRes = await fetch('/api/sessions/from-tumbler', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            handoff_filename: h.filename,
+                                            prompt: promptVal,
+                                            questions_mode: questionsModeValue
+                                        })
+                                    });
+                                    
+                                    const sessionData = await sessionRes.json();
+                                    if (!sessionRes.ok) {
+                                        throw new Error(sessionData.detail || 'Failed to create session from handoff.');
+                                    }
+                                    
+                                    // Start streaming debate for new session id
+                                    const streamFormData = new FormData();
+                                    streamFormData.append('session_id', sessionData.session_id);
+                                    streamFormData.append('questions_mode', questionsModeValue);
+                                    
+                                    await startStreamingDebate('/api/sessions/stream', streamFormData);
+                                    
+                                    // Refresh handoffs
+                                    loadIncomingHandoffs();
+                                } catch (err) {
+                                    alert("Error: " + err.message);
+                                    btn.disabled = false;
+                                    btn.textContent = 'Run Crucible on this';
+                                }
+                            };
+                            
+                            card.appendChild(top);
+                            card.appendChild(label);
+                            card.appendChild(textarea);
+                            card.appendChild(btn);
+                            
+                            handoffsList.appendChild(card);
+                        });
+                    } else {
+                        handoffsList.innerHTML = `<p style="color: #9ca3af; font-size: 0.95rem; margin: 0;">No incoming handoffs. Run Tumbler with the 'Push to Crucible' option enabled on a PASS verdict.</p>`;
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading incoming handoffs", err);
+                handoffsList.innerHTML = `<p style="color: #ef4444; font-size: 0.95rem; margin: 0;">Failed to load incoming handoffs from Tumbler.</p>`;
+            }
+        }
+
+        async function loadActiveSessions() {
+            try {
+                const res = await fetch('/api/sessions/active');
+                if (res.ok) {
+                    const sessions = await res.json();
+                    if (sessions.length > 0) {
+                        activeSessionsCard.style.display = 'block';
+                        activeSessionsList.innerHTML = '';
+                        sessions.forEach(s => {
+                            const div = document.createElement('div');
+                            div.className = 'active-session-item';
+                            
+                            const left = document.createElement('div');
+                            left.innerHTML = `
+                                <div class="prompt-preview">${escapeHtml(s.prompt)}</div>
+                                <span>Session ID: ${s.session_id.substring(0, 8)}... | Started: ${new Date(s.created_at).toLocaleString()}</span>
+                            `;
+                            
+                            const btn = document.createElement('button');
+                            btn.className = 'resume-btn';
+                            btn.textContent = 'Resume';
+                            btn.onclick = () => resumeDebateSession(s.session_id);
+                            
+                            div.appendChild(left);
+                            div.appendChild(btn);
+                            activeSessionsList.appendChild(div);
+                        });
+                    } else {
+                        activeSessionsCard.style.display = 'none';
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading active sessions", err);
+            }
+        }
+
+        // File dropzone trigger
         filesInput.addEventListener('change', () => {
             const files = filesInput.files;
             if (files.length > 0) {
@@ -543,19 +1051,23 @@
             }
         });
 
-        // Submit form handler
+        // Copy button behavior
+        copyPromptBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(finalPromptText.textContent);
+            copyPromptBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyPromptBtn.textContent = 'Copy to Clipboard';
+            }, 3000);
+        });
+
+        // Submit form handler for starting a debate
         submitBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            
-            // Clear previous states
             errorBanner.style.display = 'none';
-            errorBanner.textContent = '';
-            resultContainer.style.display = 'none';
-
+            
             const promptValue = promptInput.value.trim();
             const files = filesInput.files;
 
-            // Simple client-side validation
             if (!promptValue) {
                 showError('The prompt cannot be empty');
                 return;
@@ -565,9 +1077,8 @@
                 return;
             }
 
-            // Set loading state
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner"></span>Engaging Adversaries...';
+            submitBtn.innerHTML = '<span class="spinner"></span>Extracting & Loading...';
 
             const formData = new FormData();
             formData.append('prompt', promptValue);
@@ -575,88 +1086,446 @@
                 const path = files[i].webkitRelativePath || files[i].name;
                 formData.append('files', files[i], path);
             }
+            const questionsModeValue = document.querySelector('input[name="questionsMode"]:checked').value;
+            formData.append('questions_mode', questionsModeValue);
 
             try {
-                const response = await fetch('/api/sessions', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    showError(data.error || 'An unexpected error occurred.');
-                } else {
-                    // Populate and display result
-                    resSessionId.textContent = data.session_id;
-                    resPrompt.textContent = data.prompt;
-                    
-                    // Render defender proposals
-                    renderProposals(defenderList, data.defender_response.proposals);
-                    
-                    // Render challenger proposals
-                    renderProposals(challengerList, data.challenger_response.proposals);
-
-                    resultContainer.style.display = 'flex';
-                    resultContainer.scrollIntoView({ behavior: 'smooth' });
-                }
+                await startStreamingDebate('/api/sessions/stream', formData);
             } catch (err) {
-                showError('Failed to communicate with the server. Make sure the backend is running and environment keys are loaded.');
-            } finally {
-                // Reset submit button state
+                showError(err.message || 'Error occurred starting debate stream.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Run Crucible';
             }
         });
 
-        function renderProposals(container, proposals) {
-            container.innerHTML = '';
+        // Resume session helper
+        async function resumeDebateSession(sessionId) {
+            errorBanner.style.display = 'none';
+            activeSessionsCard.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span>Resuming...';
             
-            if (!proposals || proposals.length === 0) {
-                container.innerHTML = '<div class="no-proposals">No proposals generated by this adversary.</div>';
-                return;
+            const formData = new FormData();
+            formData.append('session_id', sessionId);
+            const questionsModeValue = document.querySelector('input[name="questionsMode"]:checked').value;
+            formData.append('questions_mode', questionsModeValue);
+            
+            try {
+                await startStreamingDebate('/api/sessions/stream', formData);
+            } catch (err) {
+                showError(err.message || 'Error occurred resuming debate stream.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Run Crucible';
+            }
+        }
+
+        // Generic stream connection using POST with fetch and readable reader
+        async function startStreamingDebate(url, formData) {
+            // Reset results view
+            roundsContainer.innerHTML = '';
+            synthesisCard.style.display = 'none';
+            logConsole.innerHTML = '';
+            defenderScoreVal.textContent = '0.0';
+            challengerScoreVal.textContent = '0.0';
+            sessionStatusVal.textContent = 'Preparing';
+            resultContainer.style.display = 'flex';
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+            
+            roundsData = [];
+            currentRoundsModel = {};
+
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Request failed');
             }
 
-            proposals.forEach(prop => {
-                const card = document.createElement('div');
-                card.className = 'proposal-card';
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let buffer = '';
+
+            addLogLine('System', 'Connected to debate events stream. Processing corpus...', 'system');
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
                 
-                const topDiv = document.createElement('div');
-                topDiv.className = 'proposal-top';
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // save incomplete line
                 
-                const severity = prop.severity ? prop.severity.toLowerCase() : 'minor';
-                const sevSpan = document.createElement('span');
-                sevSpan.className = `severity-tag severity-${severity}`;
-                sevSpan.textContent = severity;
+                let currentEvent = '';
+                for (const line of lines) {
+                    if (line.startsWith('event: ')) {
+                        currentEvent = line.slice(7).trim();
+                    } else if (line.startsWith('data: ')) {
+                        const dataStr = line.slice(6).trim();
+                        try {
+                            const dataObj = JSON.parse(dataStr);
+                            handleDebateEvent(currentEvent, dataObj);
+                        } catch (e) {
+                            console.error("Error parsing event data", e, dataStr);
+                        }
+                        currentEvent = '';
+                    }
+                }
+            }
+            
+            addLogLine('System', 'Debate connection stream closed.', 'system');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Run Crucible';
+            loadActiveSessions();
+        }
+
+        function addLogLine(sender, message, type = 'normal') {
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            const time = new Date().toLocaleTimeString();
+            line.textContent = `[${time}] ${sender}: ${message}`;
+            logConsole.appendChild(line);
+            logConsole.scrollTop = logConsole.scrollHeight;
+        }
+
+        function handleDebateEvent(event, data) {
+            console.log(`SSE [${event}]:`, data);
+            
+            switch (event) {
+                case 'session_started':
+                    sessionStatusVal.textContent = 'Debating';
+                    currentSessionId = data.session_id;
+                    addLogLine('System', `Session started. ID: ${data.session_id}`, 'system');
+                    break;
+                case 'questions_pending':
+                    sessionStatusVal.textContent = 'Waiting for Human';
+                    addLogLine('System', 'Orchestrator paused: pending questions for the human.', 'system');
+                    showQuestionsModal(data);
+                    break;
+                case 'questions_auto_answered':
+                    addLogLine('System', `Questions auto-answered (Mode ON).`, 'system');
+                    data.answers.forEach(ans => {
+                        addLogLine(capitalize(data.adversary), `Question: "${ans.question}" -> Auto-answered: "${ans.answer}" (auto)`, 'normal');
+                    });
+                    break;
+                case 'corpus_built':
+                    addLogLine('System', `Corpus built successfully. Total files: ${data.file_count}, length: ${data.total_chars} chars`, 'system');
+                    break;
+                case 'round_started':
+                    const rNum = data.round_number;
+                    addLogLine('System', `Round ${rNum} started.`, 'system');
+                    getOrCreateRoundCard(rNum);
+                    break;
+                case 'turn_started':
+                    addLogLine('System', `${capitalize(data.adversary)} turn started for Round ${data.round_number}.`, 'system');
+                    break;
+                case 'turn_completed':
+                    addLogLine('System', `${capitalize(data.adversary)} turn completed. Summary: ${data.response.summary}`, 'system');
+                    populateRoundTurn(data.round_number, data.adversary, data.response);
+                    break;
+                case 'round_scored':
+                    addLogLine('System', `Round ${data.round_number} scored. Defender gained: ${data.defender_score.toFixed(1)}, Challenger gained: ${data.challenger_score.toFixed(1)}`, 'system');
+                    updateScores(data.round_number, data.cumulative, data.defender_score, data.challenger_score);
+                    break;
+                case 'termination':
+                    sessionStatusVal.textContent = 'Terminated';
+                    addLogLine('System', `Loop terminated. Reason: ${data.reason}`, 'system');
+                    break;
+                case 'synthesis_started':
+                    sessionStatusVal.textContent = 'Synthesizing';
+                    addLogLine('System', `Synthesis started. Winning writer: ${capitalize(data.winner)}`, 'system');
+                    break;
+                case 'synthesis_completed':
+                    sessionStatusVal.textContent = 'Completed';
+                    addLogLine('System', 'Synthesis complete. Antigravity prompt generated.', 'system');
+                    renderFinalPrompt(data.final_prompt);
+                    break;
+                case 'error':
+                    sessionStatusVal.textContent = 'Failed';
+                    addLogLine('Error', data.error, 'error');
+                    break;
+            }
+        }
+
+        function getOrCreateRoundCard(roundNumber) {
+            if (currentRoundsModel[roundNumber]) {
+                return currentRoundsModel[roundNumber].element;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'round-card';
+            card.id = `round-card-${roundNumber}`;
+
+            const header = document.createElement('div');
+            header.className = 'round-header';
+            header.onclick = () => toggleRoundCollapse(roundNumber);
+
+            header.innerHTML = `
+                <div class="round-title-group">
+                    <span class="round-number-badge">Round ${roundNumber}</span>
+                    <span class="round-scores-summary" id="round-scores-summary-${roundNumber}">Turn in progress...</span>
+                </div>
+                <span class="round-collapse-icon">▼</span>
+            `;
+
+            const body = document.createElement('div');
+            body.className = 'round-body';
+            
+            // Side-by-side columns
+            body.innerHTML = `
+                <div class="adversaries-grid">
+                    <div class="adversary-column-box defender">
+                        <h3>Defender (Claude)</h3>
+                        <div class="turn-summary-block" id="def-summary-${roundNumber}" style="display: none;"></div>
+                        <div class="opponent-scores-list" id="def-opp-scores-${roundNumber}"></div>
+                        <div class="proposals-list" id="def-proposals-${roundNumber}"></div>
+                    </div>
+                    <div class="adversary-column-box challenger">
+                        <h3>Challenger (GPT)</h3>
+                        <div class="turn-summary-block" id="chal-summary-${roundNumber}" style="display: none;"></div>
+                        <div class="opponent-scores-list" id="chal-opp-scores-${roundNumber}"></div>
+                        <div class="proposals-list" id="chal-proposals-${roundNumber}"></div>
+                    </div>
+                </div>
+            `;
+
+            card.appendChild(header);
+            card.appendChild(body);
+            roundsContainer.appendChild(card);
+
+            currentRoundsModel[roundNumber] = {
+                element: card,
+                defenderData: null,
+                challengerData: null
+            };
+
+            return card;
+        }
+
+        function toggleRoundCollapse(roundNumber) {
+            const card = document.getElementById(`round-card-${roundNumber}`);
+            if (card) {
+                card.classList.toggle('collapsed');
+            }
+        }
+
+        function populateRoundTurn(roundNumber, adversary, response) {
+            getOrCreateRoundCard(roundNumber);
+            const model = currentRoundsModel[roundNumber];
+            
+            const isDef = (adversary === 'defender');
+            const prefix = isDef ? 'def' : 'chal';
+            
+            // 1. Summary
+            const summaryDiv = document.getElementById(`${prefix}-summary-${roundNumber}`);
+            summaryDiv.style.display = 'block';
+            summaryDiv.innerHTML = `<strong>Turn Analysis Summary:</strong> ${escapeHtml(response.summary)}`;
+            
+            // 2. Opponent Scores
+            const oppScoresList = document.getElementById(`${prefix}-opp-scores-${roundNumber}`);
+            oppScoresList.innerHTML = '';
+            if (response.opponent_scores && response.opponent_scores.length > 0) {
+                const lbl = document.createElement('strong');
+                lbl.textContent = 'Evaluated Opponent Proposals:';
+                lbl.style.display = 'block';
+                lbl.style.fontSize = '0.85rem';
+                lbl.style.marginBottom = '0.3rem';
+                oppScoresList.appendChild(lbl);
                 
-                const citSpan = document.createElement('span');
-                citSpan.className = 'citation';
-                citSpan.textContent = prop.groundednessCitation || 'General';
-                citSpan.title = prop.groundednessCitation || 'General';
-                
-                topDiv.appendChild(sevSpan);
-                topDiv.appendChild(citSpan);
-                
-                const textDiv = document.createElement('div');
-                textDiv.className = 'proposal-text';
-                textDiv.textContent = prop.text;
-                
-                const reasonP = document.createElement('p');
-                reasonP.className = 'proposal-reasoning';
-                reasonP.textContent = prop.reasoning || 'No reasoning details provided.';
-                
-                card.appendChild(topDiv);
-                card.appendChild(textDiv);
-                card.appendChild(reasonP);
-                
-                container.appendChild(card);
-            });
+                response.opponent_scores.forEach(s => {
+                    const item = document.createElement('div');
+                    item.className = 'score-verdict-item';
+                    
+                    const scoreType = s.verdict.toLowerCase();
+                    item.innerHTML = `
+                        <div class="verdict-header">
+                            <span style="font-family: 'Fira Code', monospace; font-weight: 500;">${s.proposal_id}</span>
+                            <span class="verdict-badge verdict-${scoreType}">${s.verdict}</span>
+                        </div>
+                        <div style="color: var(--text-secondary); margin-bottom: 0.2rem;">${escapeHtml(s.reasoning)}</div>
+                        ${s.modification ? `<div style="border-left: 2px dashed var(--primary); padding-left: 0.5rem; margin-top: 0.2rem; font-style: italic;">Mod: ${escapeHtml(s.modification)}</div>` : ''}
+                    `;
+                    oppScoresList.appendChild(item);
+                });
+            }
+            
+            // 3. New Proposals
+            const propList = document.getElementById(`${prefix}-proposals-${roundNumber}`);
+            propList.innerHTML = '';
+            if (response.new_proposals && response.new_proposals.length > 0) {
+                const lbl = document.createElement('strong');
+                lbl.textContent = 'New Proposals:';
+                lbl.style.display = 'block';
+                lbl.style.fontSize = '0.85rem';
+                lbl.style.marginBottom = '0.3rem';
+                propList.appendChild(lbl);
+
+                response.new_proposals.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'proposal-card';
+                    
+                    const severity = p.severity ? p.severity.toLowerCase() : 'minor';
+                    
+                    card.innerHTML = `
+                        <div class="proposal-top">
+                            <span class="severity-tag severity-${severity}">${severity}</span>
+                            <span class="citation" title="${escapeHtml(p.groundednessCitation)}">${escapeHtml(p.groundednessCitation || 'General')}</span>
+                        </div>
+                        <div class="proposal-text">${escapeHtml(p.text)}</div>
+                        <p class="proposal-reasoning">${escapeHtml(p.reasoning || 'No reasoning provided')}</p>
+                    `;
+                    propList.appendChild(card);
+                });
+            } else {
+                propList.innerHTML = '<div class="no-proposals">No new proposals this turn.</div>';
+            }
+        }
+
+        function updateScores(roundNumber, cumulative, defenderGain, challengerGain) {
+            defenderScoreVal.textContent = cumulative.defender.toFixed(1);
+            challengerScoreVal.textContent = cumulative.challenger.toFixed(1);
+            
+            const summarySpan = document.getElementById(`round-scores-summary-${roundNumber}`);
+            if (summarySpan) {
+                if (roundNumber === 1) {
+                    summarySpan.textContent = `Initial Setup Round (Parallel)`;
+                } else {
+                    summarySpan.textContent = `Round Scores — Defender: +${defenderGain.toFixed(1)} | Challenger: +${challengerGain.toFixed(1)}`;
+                }
+            }
+        }
+
+        function renderFinalPrompt(prompt) {
+            finalPromptText.textContent = prompt;
+            synthesisCard.style.display = 'block';
+            synthesisCard.scrollIntoView({ behavior: 'smooth' });
         }
 
         function showError(msg) {
             errorBanner.textContent = msg;
             errorBanner.style.display = 'block';
             errorBanner.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function capitalize(s) {
+            if (!s) return '';
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function showQuestionsModal(data) {
+            const modal = document.getElementById('questionsModal');
+            const body = document.getElementById('questionsModalBody');
+            const errorDiv = document.getElementById('modalError');
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+            
+            body.innerHTML = '';
+            
+            data.questions.forEach((q, idx) => {
+                const item = document.createElement('div');
+                item.className = 'question-item';
+                
+                item.innerHTML = `
+                    <div class="question-text">${idx + 1}. ${escapeHtml(q.question)}</div>
+                    <div class="question-meta">
+                        <strong>Why it matters:</strong> ${escapeHtml(q.why_it_matters)}
+                    </div>
+                    <div class="question-default-box">
+                        <strong>Recommended Default:</strong> ${escapeHtml(q.recommended_default)}
+                        <br>
+                        <strong>Reasoning:</strong> ${escapeHtml(q.default_reasoning)}
+                    </div>
+                    <textarea class="question-answer-input" data-question-id="${q.question_id}" style="width: 100%; min-height: 80px; margin-top: 0.5rem;" placeholder="Type your answer here...">${escapeHtml(q.recommended_default)}</textarea>
+                `;
+                body.appendChild(item);
+            });
+            
+            const submitBtn = document.getElementById('submitAnswersBtn');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Answers';
+            
+            submitBtn.onclick = async () => {
+                const inputs = body.querySelectorAll('.question-answer-input');
+                const answers = [];
+                let hasError = false;
+                
+                errorDiv.style.display = 'none';
+                errorDiv.textContent = '';
+                
+                inputs.forEach(input => {
+                    const ansVal = input.value.trim();
+                    const qId = input.dataset.questionId;
+                    
+                    // Reject empty answers
+                    if (!ansVal) {
+                        errorDiv.textContent = 'Answers cannot be empty.';
+                        errorDiv.style.display = 'block';
+                        hasError = true;
+                        input.style.borderColor = 'red';
+                        return;
+                    }
+                    
+                    // Cap at 4000 characters
+                    if (ansVal.length > 4000) {
+                        errorDiv.textContent = 'Answers cannot exceed 4000 characters.';
+                        errorDiv.style.display = 'block';
+                        hasError = true;
+                        input.style.borderColor = 'red';
+                        return;
+                    }
+                    
+                    input.style.borderColor = ''; // reset style
+                    answers.push({ question_id: qId, answer: ansVal });
+                });
+                
+                if (hasError) return;
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span>Submitting...';
+                
+                try {
+                    // Send answers in parallel
+                    const postPromises = answers.map(ans => 
+                        fetch(`/api/sessions/${currentSessionId}/answers`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(ans)
+                        }).then(async res => {
+                            if (!res.ok) {
+                                const errData = await res.json();
+                                throw new Error(errData.detail || 'Failed to submit answer.');
+                            }
+                            return res.json();
+                        })
+                    );
+                    
+                    await Promise.all(postPromises);
+                    
+                    // Close modal and resume status display
+                    modal.classList.remove('active');
+                    sessionStatusVal.textContent = 'Debating';
+                    addLogLine('System', 'Submitted answers to the orchestrator. Resuming debate...', 'system');
+                } catch (err) {
+                    errorDiv.textContent = err.message || 'Error occurred submitting answers.';
+                    errorDiv.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Answers';
+                }
+            };
+            
+            modal.classList.add('active');
         }
     </script>
 </body>

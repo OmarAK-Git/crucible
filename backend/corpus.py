@@ -125,3 +125,13 @@ def build_evidence_bundle(scanned_files_data: list[dict]) -> str:
         bundle += f'\n</evidence>\n\n'
         
     return bundle
+
+def load_pre_built_corpus(corpus_string: str) -> str:
+    """
+    Validates a pre-built corpus string from Tumbler (non-empty and contains at least one <evidence> tag)
+    and returns it as-is.
+    """
+    if not corpus_string or not corpus_string.strip() or "<evidence" not in corpus_string:
+        raise ValueError("The handoff file's corpus bundle is invalid — it does not appear to be a Tumbler-built bundle.")
+    return corpus_string
+

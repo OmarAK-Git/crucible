@@ -1,0 +1,77 @@
+diff --git a/CRUCIBLE_SPEC.md b/CRUCIBLE_SPEC.md
+index 87b72e1..203aaa9 100644
+--- a/CRUCIBLE_SPEC.md
++++ b/CRUCIBLE_SPEC.md
+@@ -249,7 +249,7 @@ The adversaries determine the application's purpose by reading the README, the s
+ 
+ ### Phase 2 — Adversaries and Personas
+ 
+-**Phase Transition Status:** Phase 1 was successfully completed and gate-verified. We are now in Phase 2. Features that were excluded in Phase 1 (GPT integration, personas, anti-sycophancy) are now actively built in this phase, maintaining compliance with the atomic build rules.
++**Phase Transition Status:** Phase 2 was successfully completed and gate-verified.
+ 
+ **Goal:** Both adversaries running with their personas and the anti-sycophancy protocol, but in parallel-only mode (no debate yet, no scoring). Proves the LLM contracts work.
+ 
+@@ -278,6 +278,8 @@ The adversaries determine the application's purpose by reading the README, the s
+ 
+ ### Phase 3 — Sequential Debate and Scoring
+ 
++**Phase Transition Status:** Phase 3 was successfully completed and gate-verified.
++
+ **Goal:** The full loop. Round 1 parallel → rounds 2+ sequential → deterministic scoring → multi-factor termination → winner writes final synthesis.
+ 
+ **Build:**
+@@ -304,6 +306,8 @@ The adversaries determine the application's purpose by reading the README, the s
+ 
+ ### Phase 4 — Human-in-the-Loop and Scope Evaluation
+ 
++**Phase Transition Status:** Phase 4 was successfully completed and gate-verified.
++
+ **Goal:** Radio-button question handling and explicit scope-at-purpose evaluation.
+ 
+ **Build:**
+diff --git a/README.md b/README.md
+index 03dc11e..0884933 100644
+--- a/README.md
++++ b/README.md
+@@ -4,5 +4,39 @@ Crucible is an adversarial prompt-hardening engine designed to optimize Antigrav
+ 
+ For details on the design, architecture, and phased implementation schedule, please see [CRUCIBLE_SPEC.md](CRUCIBLE_SPEC.md).
+ 
+-## Phase 2 — Adversaries and Personas
+-This repository currently implements Phase 2 (Adversaries and Personas), featuring concurrent execution of both Claude (Defender) and GPT (Challenger) adversaries with distinct personas, an anti-sycophancy protocol, structured JSON schema validation, and a side-by-side frontend dashboard showing the generated proposals.
++## Phase 4 — Human-in-the-Loop and Scope Evaluation
++
++This repository currently implements **Phase 4 (Human-in-the-Loop and Scope Evaluation)**. The engine orchestrates a multi-round debate between two LLM adversaries:
++1. **Claude (The Defender):** Identifies where prompt guidelines are vague, ungrounded, or unexecutable against the actual codebase.
++2. **GPT (The Challenger):** Attacks the prompt from a security, edge case, and safety perspective.
++
++### Key Features
++- **Human-in-the-Loop Questions:** Allows adversaries to pause the debate to ask fundamental clarifying questions. Questions Mode radio buttons on the frontend control whether the orchestrator pauses for manual input (Mode OFF) or auto-answers using recommended defaults (Mode ON).
++- **Scope-at-Purpose Evaluation:** Personas evaluate prompt changes against the core application purpose to prevent scope creep, flagging violations as critical severity.
++- **Sequential Turn Orchestration:** Round 1 runs in parallel. Rounds 2 through 5 run sequentially, alternating Defender and Challenger turns.
++- **Deterministic Scoring Engine:** Evaluates each model's proposal based on severity (Critical = 10, Important = 5, Minor = 2), groundedness (1.0 vs 0.2), and opponent acceptance verdict (Accept = 1.0, Modify = 0.6, Reject = 0.0).
++- **Proposals Merging:** Merges accepted and modified proposals monotonically as refinements appended to the working prompt.
++- **Multi-Factor Termination:** Terminates the debate when either:
++  1. No new proposals are made and all disagreements are resolved.
++  2. The net score delta between rounds converges.
++  3. A hard cap of 5 rounds is reached.
++- **Winner-Writes-Final Synthesis:** The adversary with the highest cumulative score (or cumulative Defender score as tiebreaker) writes the final synthesized prompt.
++- **SSE Event Streaming:** Live-streams debate events (turn boundaries, round summaries, proposal updates, scores, and completion) directly to the frontend.
++- **SQLite Persistence & Resumption:** Persists sessions, rounds, turns, proposals, and scores to a local SQLite database (`~/.crucible/crucible.db`). Supports seamless resumption of active debates after server restarts.
++
++### Setup and Running
++
++1. Install backend dependencies in your python virtual environment:
++   ```bash
++   pip install -r requirements.txt
++   ```
++2. Configure API keys in a `.env` file:
++   ```env
++   ANTHROPIC_API_KEY="your-anthropic-key"
++   OPENAI_API_KEY="your-openai-key"
++   ```
++3. Run the backend uvicorn server:
++   ```bash
++   python -m uvicorn backend.main:app --port 8000
++   ```
++4. Open `frontend/index.html` in a web browser to run and view debate sessions.

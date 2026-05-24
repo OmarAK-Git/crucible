@@ -1,0 +1,514 @@
+{
+  "original_prompt": "turn Crucible into a chatbot that helps users plan their wedding",
+  "winner": "challenger",
+  "defender_score": 18.0,
+  "challenger_score": 58.2,
+  "termination_reason": "Loop completed",
+  "final_prompt": "Objective\n- Use Crucible to harden and scope a robust system prompt for a separate wedding-planning chatbot. Do not convert Crucible itself into a chatbot.\n\nBoundaries\n- Crucible remains an adversarial prompt-hardening engine; do not propose changes to its APIs, UI, runtime, or storage.\n- Operational boundaries (precision): Do not suggest any modifications to Crucible\u2019s FastAPI endpoints or runtime plumbing (e.g., /api/sessions/stream, /api/sessions/active, /api/sessions/{id}, /api/sessions/{id}/answers, /api/sessions/{id}/pending-questions), SSE event streaming, or SQLite persistence/resumption.\n- Scope-at-Purpose enforcement: If any proposal attempts to convert Crucible itself into a chatbot or otherwise change its application purpose, flag it as critical severity and reject it with a clear citation to the repository\u2019s stated purpose.\n- Out of scope for this debate: turning Crucible into a chatbot, adding conversational UI to Crucible, or modifying Crucible\u2019s backend endpoints. The scope is limited to refining the wedding-planning chatbot\u2019s prompt.\n\nGrounding and corpus\n- This session will upload a wedding-planner codebase/spec as the corpus. All proposals must include groundednessCitation paths into that wedding-planner corpus. Do not fabricate citations; if a requirement exists only in this prompt, cite \u201coriginal spec.\u201d\n- Grounding discipline: When justifying wedding-domain behaviors or requirements, cite only the uploaded wedding-planner corpus; do not use Crucible\u2019s repository files as justification for target chatbot domain behavior. If no wedding-planner corpus detail exists, cite \u201coriginal spec\u201d or ask one high-impact human question per the Questions policy.\n- Corpus requirement enforcement: Starting a new Crucible session requires at least one uploaded file; empty uploads are rejected by the backend (HTTP 400 \u201cNo files uploaded\u201d). Therefore, this session must include at least one wedding-planner corpus file (requirements/specs/code). If the uploaded corpus contains only Crucible\u2019s repository files or otherwise lacks wedding-planner materials, adversaries must halt domain-specific proposals and surface:\n  Invalid corpus: contains no wedding-planner materials. Please upload wedding-planner requirements/specs/code and restart. Do not proceed with prompt-only hardening in the absence of a valid target corpus.\n- Corpus sanity-check gate: Before proposing domain-specific changes, verify the corpus clearly pertains to wedding planning (e.g., presence of wedding-planner requirements/specs/code). If this cannot be established from the uploaded files, halt domain proposals and surface the Invalid corpus message defined above.\n- Corpus domain verification: Upon receiving the uploaded corpus, perform a lightweight domain-evidence scan across filenames/paths and file contents for clear wedding-planning indicators (examples: filenames or text referencing \u201cwedding,\u201d \u201cvenue,\u201d \u201cguest list,\u201d \u201cbudget,\u201d \u201cvendor,\u201d \u201cRSVP\u201d). If no indicators are found, immediately surface:\n  Invalid corpus: uploaded files do not appear to contain wedding-planner materials. The corpus includes only: [list representative top-level file and directory names actually found]. Please upload wedding-planner requirements/specs/code and restart. Do not proceed with any wedding-domain proposals.\n  If indicators are found, proceed but continue to ground every domain proposal with specific file-path citations as already required.\n\nHuman-in-the-Loop Questions\n- Use sparingly for fundamental ambiguities (e.g., target audience/region, currency for budgets). Questions must be limited to the target wedding-planning chatbot domain (e.g., audience, regulatory constraints, supported payments, vendor integrations). Do NOT ask about Crucible\u2019s internal APIs, SSE streaming, or persistence\u2014these are out of scope.\n- Max one high-impact question per adversary per round unless the previous answer introduces a new blocking ambiguity.\n- Every question must include: question, why_it_matters (one sentence), recommended_default, default_reasoning.\n- Execution: If Questions Mode is ON, the orchestrator auto-answers using recommended_default; if OFF, it pauses until answered.\n- Initial question for the human:\n  \u201cThe original request provides no technical feature scope for the wedding-planning chatbot. Should the debate assume a minimal representative feature set to make the prompt testable and concrete, or should the hardened prompt remain feature-agnostic and focus on general chatbot interaction quality?\u201d\n  Recommended default: Assume a minimal feature set (timeline generation, budget tracking, vendor shortlisting) to enable grounded proposals.\n  Default reasoning: A feature-agnostic prompt is too abstract to harden meaningfully; scoping to representative capabilities makes the debate actionable without overcommitting to specific implementation choices.\n\nDeliverable: Final system prompt for the separate wedding-planning chatbot\n- Acceptance: The final synthesized wedding-planning chatbot prompt must be self-contained (no external file references), immediately usable with a general LLM, and must not assume any runtime tools or APIs unless explicitly provided in the uploaded wedding-planner corpus or clarified by the human.\n- Structure: The final output must be a single, copy-pasteable system prompt organized as:\n  1) Role and objectives\n  2) Supported capabilities (commonly expected: timeline generation, budget tracking, vendor shortlisting)\n  3) Safety and scope limits (what the chatbot must refuse or defer)\n  4) Interaction style and key clarification questions it should ask\n  5) Parameterization placeholders the runtime can fill (e.g., {region}, {currency}, {wedding_date}, {guest_count}, {budget})\n  6) Output format expectations\n  Keep the prompt implementation-agnostic and tool-free unless a tools spec is provided.\n- Corpus-grounded capabilities only: The final capabilities must be limited to those supported by explicit evidence in the uploaded wedding-planner corpus or explicitly authorized by the human. During the debate, adversaries must maintain citations justifying each capability. In the final synthesized system prompt, omit citations and repository paths (per Final Prompt Hygiene); include only capabilities that were justified or explicitly approved. If a commonly expected capability (e.g., timeline generation, budget tracking, vendor shortlisting) lacks corpus support and no human approval is obtained, omit it from the final prompt rather than fabricating it.\n- Final prompt hygiene: The synthesized wedding-planning chatbot system prompt must not include Crucible debate artifacts (proposal IDs, groundedness citations, repository paths, or SSE/endpoint references). It must be clean, self-contained, and implementation-agnostic.\n- Parameterization defaults: When the user does not specify them, default placeholders to {region}=United States and {currency}=USD, unless the runtime provides overrides or the corpus specifies different defaults.",
+  "rounds": [
+    {
+      "number": 1,
+      "defender_turn": {
+        "summary": "Round 1 initial proposals",
+        "opponent_scores": [],
+        "new_proposals": [
+          {
+            "id": "D-R1-P1",
+            "adversary": "defender",
+            "text": "This prompt requests transforming Crucible into a wedding planning chatbot. This violates scope-at-purpose. Crucible's purpose is defined in README.md as 'an adversarial prompt-hardening engine designed to optimize Antigravity prompts against a codebase corpus through structured debate between LLM adversaries.' A wedding planning chatbot has zero relation to prompt hardening, adversarial debate, or codebase evaluation. This is not a feature extension \u2014 it is a complete replacement of the application with something unrelated.",
+            "severity": "critical",
+            "groundednessCitation": "README.md line 3: 'Crucible is an adversarial prompt-hardening engine'",
+            "reasoning": "The application purpose is binding per the evaluation protocol. This prompt attempts to repurpose Crucible into an entirely different domain (wedding planning) that contradicts its core function. This must be rejected as out of scope."
+          },
+          {
+            "id": "D-R1-P2",
+            "adversary": "defender",
+            "text": "The prompt provides no technical specification. What does 'turn Crucible into a chatbot' mean in implementation terms? Does it mean: (1) Replace the orchestrator.py debate loop with a chatbot conversation manager? (2) Strip out the adversarial personas and scoring engine? (3) Replace the corpus ingestion with wedding venue data? (4) Gut the SQLite schema to track user preferences instead of debate rounds? The existing codebase has 2000+ lines implementing adversarial debate, scoring, SSE streaming, and database persistence. This prompt provides zero guidance on what to preserve, what to replace, or how the resulting system should function.",
+            "severity": "critical",
+            "groundednessCitation": "backend/orchestrator.py (entire file), backend/main.py (entire file), backend/db.py (database schema)",
+            "reasoning": "The prompt is unexecutable. An implementer cannot determine from 'turn Crucible into a chatbot that helps users plan their wedding' which parts of the existing system to modify, which to delete, or what new components to build. This is not vagueness \u2014 it is complete absence of specification."
+          },
+          {
+            "id": "D-R1-P3",
+            "adversary": "defender",
+            "text": "The prompt implies deletion or replacement of the corpus ingestion system (corpus.py), which currently extracts code files, builds evidence bundles, and feeds them to adversaries. Wedding planning does not operate on codebases. Does the corpus system get replaced with a wedding vendor database? A questionnaire ingestion system? The prompt does not say.",
+            "severity": "critical",
+            "groundednessCitation": "backend/corpus.py functions extract_and_read() and build_evidence_bundle()",
+            "reasoning": "The corpus ingestion system is a foundational component. The prompt implies it becomes irrelevant but provides no replacement specification. An implementer cannot execute this."
+          },
+          {
+            "id": "D-R1-P4",
+            "adversary": "defender",
+            "text": "The prompt implies deletion or replacement of the adversarial personas (personas.py), which define Defender and Challenger roles, anti-sycophancy instructions, and scope-at-purpose evaluation logic. Wedding planning chatbots do not have adversarial personas debating prompt quality. Does this module get deleted? Replaced with wedding planning conversation templates? The prompt does not specify.",
+            "severity": "critical",
+            "groundednessCitation": "backend/personas.py DEFENDER_PERSONA, CHALLENGER_PERSONA, ANTI_SYCOPHANCY constants",
+            "reasoning": "The personas module is core to Crucible's adversarial debate architecture. The prompt implies it is incompatible with the new purpose but provides no guidance on replacement."
+          },
+          {
+            "id": "D-R1-P5",
+            "adversary": "defender",
+            "text": "The prompt implies deletion or replacement of the scoring engine (scoring.py), which computes deterministic scores based on severity, groundedness, and opponent verdicts. Wedding planning chatbots do not score proposals. Does this module get deleted? Replaced with a recommendation ranking system? The prompt does not specify.",
+            "severity": "critical",
+            "groundednessCitation": "backend/scoring.py score_round() and score_proposal() functions",
+            "reasoning": "The scoring engine is part of the debate evaluation system. The prompt implies it becomes irrelevant but provides no replacement or migration path."
+          },
+          {
+            "id": "D-R1-P6",
+            "adversary": "defender",
+            "text": "The prompt implies deletion or replacement of the termination logic (termination.py), which determines when the adversarial debate should end based on convergence, disagreement resolution, or round limits. Wedding planning chatbots do not have debate termination logic. Does this module get deleted? The prompt does not say.",
+            "severity": "critical",
+            "groundednessCitation": "backend/termination.py should_terminate() function",
+            "reasoning": "The termination module is specific to adversarial debate loops. The prompt implies it is incompatible with the new purpose but provides no specification for what replaces it."
+          },
+          {
+            "id": "D-R1-P7",
+            "adversary": "defender",
+            "text": "The prompt implies deletion or replacement of the synthesis module (synthesis.py), which generates the final hardened prompt after debate completion. Wedding planning chatbots do not synthesize hardened prompts. Does this module get deleted? Replaced with a wedding plan summary generator? The prompt does not specify.",
+            "severity": "critical",
+            "groundednessCitation": "backend/synthesis.py write_final_prompt() function",
+            "reasoning": "The synthesis module is the output of the debate process. The prompt implies it becomes irrelevant but provides no replacement specification."
+          },
+          {
+            "id": "D-R1-P8",
+            "adversary": "defender",
+            "text": "The prompt implies changes to the database schema (db.py), which currently tracks sessions, rounds, turns, proposals, scores, and questions. Wedding planning chatbots would require a fundamentally different schema (user preferences, vendor options, budget tracking, timeline events). Does the existing schema get migrated? Replaced entirely? The prompt does not specify.",
+            "severity": "critical",
+            "groundednessCitation": "backend/db.py init_db() function and SQL schema definitions",
+            "reasoning": "The database schema is tightly coupled to the adversarial debate structure. The prompt implies a complete replacement but provides zero migration or new schema specification."
+          },
+          {
+            "id": "D-R1-P9",
+            "adversary": "defender",
+            "text": "The prompt implies changes to the API endpoints (main.py), which currently support /api/sessions/stream for debate orchestration, /api/sessions/active for listing running debates, and /api/sessions/{id}/answers for human-in-the-loop question answering. Wedding planning chatbots would require entirely different endpoints (venue search, budget calculation, guest list management). Does the existing API get replaced? Extended? The prompt does not specify.",
+            "severity": "critical",
+            "groundednessCitation": "backend/main.py API route definitions",
+            "reasoning": "The API surface is designed for adversarial debate workflows. The prompt implies incompatibility but provides no new API specification."
+          },
+          {
+            "id": "D-R1-P10",
+            "adversary": "defender",
+            "text": "The prompt implies changes to the frontend (frontend/index.html), which currently displays debate rounds, turn-by-turn proposal updates, score progression, and human-in-the-loop question interfaces. Wedding planning chatbots would require a completely different UI (chat interface, venue cards, budget visualizations). Does the existing frontend get replaced? The prompt does not say.",
+            "severity": "critical",
+            "groundednessCitation": "frontend/index.html (file existence implies debate-specific UI)",
+            "reasoning": "The frontend is built for debate visualization. The prompt implies a complete UI overhaul but provides no design specification."
+          }
+        ],
+        "disagreements": [],
+        "questions_for_human": [
+          {
+            "question": "Is this prompt a mistake? Did you mean to send a different prompt to a different system?",
+            "why_it_matters": "This prompt requests replacing Crucible with an unrelated application, which contradicts the entire codebase purpose.",
+            "recommended_default": "Assume the prompt is a mistake and reject it as out of scope.",
+            "default_reasoning": "The most charitable interpretation is user error (wrong prompt sent to wrong system). No implementer should execute a prompt that destroys the application's purpose without explicit confirmation that this destruction is intentional."
+          }
+        ]
+      },
+      "challenger_turn": {
+        "summary": "Round 1 initial proposals",
+        "opponent_scores": [],
+        "new_proposals": [
+          {
+            "id": "C-R1-P1",
+            "adversary": "challenger",
+            "text": "Replace the original request with: Objective: Use Crucible to harden and scope a robust system prompt for a separate wedding-planning chatbot. Do not convert Crucible itself into a chatbot. Boundaries: - Crucible remains an adversarial prompt-hardening engine; do not propose changes to its APIs, UI, runtime, or storage. - Operate only on refining the target chatbot's prompt and requirements text. Deliverable: - A final synthesized wedding-planning chatbot prompt suitable for use with a general LLM.",
+            "severity": "critical",
+            "groundednessCitation": "README.md",
+            "reasoning": "The current request changes the application's purpose from a prompt-hardening engine into a chatbot, which violates Crucible\u2019s stated purpose and the repo\u2019s Scope-at-Purpose evaluation guardrails."
+          },
+          {
+            "id": "C-R1-P2",
+            "adversary": "challenger",
+            "text": "Add explicit grounding and corpus instructions to the prompt: Grounding and corpus: - This session will upload a wedding-planner codebase/spec as the corpus. All proposals must include groundednessCitation paths into that corpus. - Do not fabricate citations; if a requirement exists only in this prompt, cite 'original spec'. - If a necessary detail is missing from the corpus, ask one high-impact question via the Human-in-the-Loop protocol; if Questions Mode is ON, accept the recommended default.",
+            "severity": "important",
+            "groundednessCitation": "backend/orchestrator.py:get_round_n_system_prompt",
+            "reasoning": "Crucible\u2019s debate flow requires grounded citations and supports questions for fundamental ambiguities; making this explicit in the prompt improves executability and aligns with the orchestrator\u2019s groundedness expectations."
+          },
+          {
+            "id": "C-R1-P3",
+            "adversary": "challenger",
+            "text": "Add an operational note to the prompt: To run this session, upload at least one file in the wedding-planner corpus; if no corpus can be provided right now, restrict proposals to prompt-only changes and use 'original spec' for groundednessCitation.",
+            "severity": "important",
+            "groundednessCitation": "backend/main.py:start_or_resume_debate",
+            "reasoning": "Starting a new session without uploaded files returns HTTP 400 ('No files uploaded'); making this requirement explicit avoids unexecutable runs and clarifies fallback behavior."
+          },
+          {
+            "id": "C-R1-P4",
+            "adversary": "challenger",
+            "text": "Add a concise questions policy to the prompt: Human-in-the-Loop: Use sparingly for fundamental ambiguities (e.g., target audience/region, currency for budgets). Every question must include a recommended_default and default_reasoning per the Questions-for-Human protocol.",
+            "severity": "important",
+            "groundednessCitation": "README.md",
+            "reasoning": "The repo explicitly supports Human-in-the-Loop questions with defaults; encoding this policy in the prompt guides adversaries to pause only for high-impact clarifications."
+          },
+          {
+            "id": "C-R1-P5",
+            "adversary": "challenger",
+            "text": "Clarify explicit out-of-scope items in the prompt: Out of scope for this debate: turning Crucible into a chatbot, adding conversational UI to Crucible, or modifying Crucible\u2019s backend endpoints. The scope is limited to refining the wedding-planning chatbot\u2019s prompt.",
+            "severity": "minor",
+            "groundednessCitation": "README.md",
+            "reasoning": "Restating the scope boundary reduces future scope creep and keeps proposals aligned with Crucible\u2019s purpose."
+          },
+          {
+            "id": "C-R1-P6",
+            "adversary": "challenger",
+            "text": "Optionally focus the target chatbot prompt on three core capabilities to make hardening concrete: - Timeline generation for a 12\u201318 month planning window with milestone reminders. - Budget planning with category caps and running totals. - Vendor shortlisting using user-provided criteria and pros/cons. Treat anything beyond these as optional extensions.",
+            "severity": "minor",
+            "groundednessCitation": "original spec",
+            "reasoning": "The original request is vague; scoping to a minimal, representative feature set makes the prompt more testable without altering Crucible\u2019s purpose."
+          }
+        ],
+        "disagreements": [],
+        "questions_for_human": [
+          {
+            "question": "Will you upload a wedding-planner codebase/spec corpus for this session so proposals can cite files, or should the debate operate only against this prompt text?",
+            "why_it_matters": "Crucible requires an uploaded corpus for new sessions and the debate expects grounded citations to that corpus.",
+            "recommended_default": "Yes\u2014provide a wedding-planner codebase/spec corpus to ground the debate.",
+            "default_reasoning": "The backend rejects new sessions without files, and grounding to a real corpus improves proposal quality and is consistent with the orchestrator\u2019s 'grounded citations only' instruction."
+          }
+        ]
+      },
+      "working_prompt_after": "turn Crucible into a chatbot that helps users plan their wedding\n\n### Refinements\n\n#### Critical Severity:\n- This prompt requests transforming Crucible into a wedding planning chatbot. This violates scope-at-purpose. Crucible's purpose is defined in README.md as 'an adversarial prompt-hardening engine designed to optimize Antigravity prompts against a codebase corpus through structured debate between LLM adversaries.' A wedding planning chatbot has zero relation to prompt hardening, adversarial debate, or codebase evaluation. This is not a feature extension \u2014 it is a complete replacement of the application with something unrelated.\n- The prompt provides no technical specification. What does 'turn Crucible into a chatbot' mean in implementation terms? Does it mean: (1) Replace the orchestrator.py debate loop with a chatbot conversation manager? (2) Strip out the adversarial personas and scoring engine? (3) Replace the corpus ingestion with wedding venue data? (4) Gut the SQLite schema to track user preferences instead of debate rounds? The existing codebase has 2000+ lines implementing adversarial debate, scoring, SSE streaming, and database persistence. This prompt provides zero guidance on what to preserve, what to replace, or how the resulting system should function.\n- The prompt implies deletion or replacement of the corpus ingestion system (corpus.py), which currently extracts code files, builds evidence bundles, and feeds them to adversaries. Wedding planning does not operate on codebases. Does the corpus system get replaced with a wedding vendor database? A questionnaire ingestion system? The prompt does not say.\n- The prompt implies deletion or replacement of the adversarial personas (personas.py), which define Defender and Challenger roles, anti-sycophancy instructions, and scope-at-purpose evaluation logic. Wedding planning chatbots do not have adversarial personas debating prompt quality. Does this module get deleted? Replaced with wedding planning conversation templates? The prompt does not specify.\n- The prompt implies deletion or replacement of the scoring engine (scoring.py), which computes deterministic scores based on severity, groundedness, and opponent verdicts. Wedding planning chatbots do not score proposals. Does this module get deleted? Replaced with a recommendation ranking system? The prompt does not specify.\n- The prompt implies deletion or replacement of the termination logic (termination.py), which determines when the adversarial debate should end based on convergence, disagreement resolution, or round limits. Wedding planning chatbots do not have debate termination logic. Does this module get deleted? The prompt does not say.\n- The prompt implies deletion or replacement of the synthesis module (synthesis.py), which generates the final hardened prompt after debate completion. Wedding planning chatbots do not synthesize hardened prompts. Does this module get deleted? Replaced with a wedding plan summary generator? The prompt does not specify.\n- The prompt implies changes to the database schema (db.py), which currently tracks sessions, rounds, turns, proposals, scores, and questions. Wedding planning chatbots would require a fundamentally different schema (user preferences, vendor options, budget tracking, timeline events). Does the existing schema get migrated? Replaced entirely? The prompt does not specify.\n- The prompt implies changes to the API endpoints (main.py), which currently support /api/sessions/stream for debate orchestration, /api/sessions/active for listing running debates, and /api/sessions/{id}/answers for human-in-the-loop question answering. Wedding planning chatbots would require entirely different endpoints (venue search, budget calculation, guest list management). Does the existing API get replaced? Extended? The prompt does not specify.\n- The prompt implies changes to the frontend (frontend/index.html), which currently displays debate rounds, turn-by-turn proposal updates, score progression, and human-in-the-loop question interfaces. Wedding planning chatbots would require a completely different UI (chat interface, venue cards, budget visualizations). Does the existing frontend get replaced? The prompt does not say.\n- Replace the original request with: Objective: Use Crucible to harden and scope a robust system prompt for a separate wedding-planning chatbot. Do not convert Crucible itself into a chatbot. Boundaries: - Crucible remains an adversarial prompt-hardening engine; do not propose changes to its APIs, UI, runtime, or storage. - Operate only on refining the target chatbot's prompt and requirements text. Deliverable: - A final synthesized wedding-planning chatbot prompt suitable for use with a general LLM.\n\n#### Important Severity:\n- Add explicit grounding and corpus instructions to the prompt: Grounding and corpus: - This session will upload a wedding-planner codebase/spec as the corpus. All proposals must include groundednessCitation paths into that corpus. - Do not fabricate citations; if a requirement exists only in this prompt, cite 'original spec'. - If a necessary detail is missing from the corpus, ask one high-impact question via the Human-in-the-Loop protocol; if Questions Mode is ON, accept the recommended default.\n- Add an operational note to the prompt: To run this session, upload at least one file in the wedding-planner corpus; if no corpus can be provided right now, restrict proposals to prompt-only changes and use 'original spec' for groundednessCitation.\n- Add a concise questions policy to the prompt: Human-in-the-Loop: Use sparingly for fundamental ambiguities (e.g., target audience/region, currency for budgets). Every question must include a recommended_default and default_reasoning per the Questions-for-Human protocol.\n\n#### Minor Severity:\n- Clarify explicit out-of-scope items in the prompt: Out of scope for this debate: turning Crucible into a chatbot, adding conversational UI to Crucible, or modifying Crucible\u2019s backend endpoints. The scope is limited to refining the wedding-planning chatbot\u2019s prompt.\n- Optionally focus the target chatbot prompt on three core capabilities to make hardening concrete: - Timeline generation for a 12\u201318 month planning window with milestone reminders. - Budget planning with category caps and running totals. - Vendor shortlisting using user-provided criteria and pros/cons. Treat anything beyond these as optional extensions.",
+      "scores_this_round": {
+        "defender": 0.0,
+        "challenger": 0.0
+      }
+    },
+    {
+      "number": 2,
+      "defender_turn": {
+        "summary": "Round 2 Defender: Scoring opponent proposals and defending critical scope-at-purpose violation",
+        "opponent_scores": [
+          {
+            "proposal_id": "C-R1-P1",
+            "verdict": "accept",
+            "reasoning": "This proposal correctly identifies and fixes the critical scope-at-purpose violation. The original prompt requests converting Crucible itself into a wedding chatbot, which contradicts README.md's definition of Crucible as 'an adversarial prompt-hardening engine.' The Challenger's reframe preserves Crucible's purpose (hardening prompts via adversarial debate) while redirecting the task to producing a hardened prompt FOR a wedding chatbot, not BECOMING one. This is grounded in README.md and eliminates the scope violation.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P2",
+            "verdict": "accept",
+            "reasoning": "This proposal is grounded in backend/orchestrator.py:get_round_n_system_prompt, which requires 'grounded citations only' and 'File path, function, or line number in the corpus, or original spec' for groundednessCitation. Making the corpus upload expectation and citation discipline explicit in the prompt improves executability. The instruction to ask questions via Human-in-the-Loop when details are missing aligns with README.md's 'Human-in-the-Loop Questions' feature.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P3",
+            "verdict": "accept",
+            "reasoning": "This is grounded in backend/main.py:start_or_resume_debate, which validates 'valid_files = [f for f in files if f.filename and f.filename.strip()]' and returns HTTP 400 with 'No files uploaded' if the list is empty. The operational note clarifies this requirement upfront and provides a fallback ('restrict proposals to prompt-only changes and use original spec'), preventing unexecutable sessions.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P4",
+            "verdict": "accept",
+            "reasoning": "This is grounded in README.md: 'Human-in-the-Loop Questions: Allows adversaries to pause the debate to ask fundamental clarifying questions.' The backend/orchestrator.py:get_round_n_system_prompt already includes the questions protocol with 'recommended_default' and 'default_reasoning' fields. Encoding this policy concisely in the prompt aligns adversary behavior with the system's capabilities and discourages over-use of questions.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P5",
+            "verdict": "accept",
+            "reasoning": "This proposal restates the scope boundary established by C-R1-P1. It is grounded in README.md's definition of Crucible's purpose and reinforces that the debate operates on the target chatbot's prompt, not on Crucible's codebase. While redundant with C-R1-P1, explicit out-of-scope statements reduce ambiguity and are a minor but valid addition.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R1-P6",
+            "verdict": "modify",
+            "reasoning": "The proposal attempts to reduce vagueness by scoping the target chatbot to three core capabilities (timeline, budget, vendor shortlisting). However, it cites 'original spec' despite the original spec containing zero technical detail about wedding planning features. This modification is partially grounded (reducing vagueness is valid), but the specific feature set is fabricated rather than derived from any corpus or user requirement. The proposal should be reframed as a question to the human: 'The original request provides no feature scope for the wedding chatbot. Should the debate assume a minimal feature set (e.g., timeline, budget, vendor tools) to make the prompt concrete, or remain feature-agnostic?' This preserves the intent (scoping for concreteness) while avoiding fabrication.",
+            "modification": "Add a question to the human: 'The original request provides no technical feature scope for the wedding-planning chatbot. Should the debate assume a minimal representative feature set to make the prompt testable and concrete, or should the hardened prompt remain feature-agnostic and focus on general chatbot interaction quality?' Recommended default: Assume a minimal feature set (timeline generation, budget tracking, vendor shortlisting) to enable grounded proposals. Default reasoning: A feature-agnostic prompt is too abstract to harden meaningfully; scoping to representative capabilities makes the debate actionable without overcommitting to specific implementation choices."
+          }
+        ],
+        "new_proposals": [],
+        "disagreements": [],
+        "questions_for_human": []
+      },
+      "challenger_turn": {
+        "summary": "No opponent proposals were provided to score this turn. Proposing targeted refinements to enforce scope-at-purpose, sharpen operational boundaries with grounded citations, and make the deliverable template for the wedding-planning chatbot prompt concrete and self-contained.",
+        "opponent_scores": [],
+        "new_proposals": [
+          {
+            "id": "C-R2-P1",
+            "adversary": "challenger",
+            "text": "Add to Boundaries: Scope-at-Purpose enforcement \u2014 If any proposal attempts to convert Crucible itself into a chatbot or otherwise change its application purpose, flag it as critical severity and reject it with a clear citation to the repository\u2019s stated purpose.",
+            "severity": "important",
+            "groundednessCitation": "README.md",
+            "reasoning": "The repository establishes Crucible\u2019s purpose as an adversarial prompt-hardening engine. Making explicit enforcement and citation guidance prevents scope creep and aligns with the repo\u2019s Scope-at-Purpose feature."
+          },
+          {
+            "id": "C-R2-P2",
+            "adversary": "challenger",
+            "text": "Deliverable structure: The final output must be a single, copy-pasteable system prompt for the separate wedding-planning chatbot, organized as: (1) Role and objectives; (2) Supported capabilities (at minimum: timeline generation, budget tracking, vendor shortlisting); (3) Safety and scope limits (what the chatbot must refuse or defer); (4) Interaction style and key clarification questions it should ask; (5) Parameterization placeholders the runtime can fill (e.g., {region}, {currency}, {wedding_date}, {guest_count}, {budget}); (6) Output format expectations. Keep the prompt implementation-agnostic and tool-free unless a tools spec is provided.",
+            "severity": "important",
+            "groundednessCitation": "original spec",
+            "reasoning": "Clarifies the exact, testable deliverable for the target chatbot while staying within the prompt-only refinement scope. No wedding-planner corpus details exist here, so cite original spec."
+          },
+          {
+            "id": "C-R2-P3",
+            "adversary": "challenger",
+            "text": "Operational boundaries (precision): Do not suggest any modifications to Crucible\u2019s FastAPI endpoints or runtime plumbing (e.g., /api/sessions/stream, /api/sessions/active, /api/sessions/{id}, /api/sessions/{id}/answers, /api/sessions/{id}/pending-questions), SSE streaming, or SQLite persistence/resumption.",
+            "severity": "minor",
+            "groundednessCitation": "backend/main.py",
+            "reasoning": "Reinforces that backend endpoints and persistence are out of scope for this task with concrete references to the implemented API surface."
+          },
+          {
+            "id": "C-R2-P4",
+            "adversary": "challenger",
+            "text": "Acceptance: The final synthesized wedding-planning chatbot prompt must be self-contained (no external file references), immediately usable with a general LLM, and must not assume any runtime tools or APIs unless explicitly provided in the uploaded wedding-planner corpus or clarified by the human.",
+            "severity": "minor",
+            "groundednessCitation": "README.md",
+            "reasoning": "Aligns the deliverable with the repository\u2019s Winner-Writes-Final Synthesis behavior and ensures portability of the final prompt."
+          },
+          {
+            "id": "C-R2-P5",
+            "adversary": "challenger",
+            "text": "Grounding discipline: When justifying wedding-domain behaviors or requirements, cite only the uploaded wedding-planner corpus; do not use Crucible\u2019s repository files as justification for target chatbot domain behavior. If no wedding-planner corpus detail exists, cite 'original spec' or ask one high-impact human question per the Questions policy.",
+            "severity": "minor",
+            "groundednessCitation": "original spec",
+            "reasoning": "Prevents conflating Crucible engine internals with the separate target chatbot\u2019s domain logic; clarifies citation expectations when the wedding corpus is missing or incomplete."
+          }
+        ],
+        "disagreements": [],
+        "questions_for_human": [
+          {
+            "question": "What default region/country and currency should the wedding-planning chatbot assume when the user doesn\u2019t specify them?",
+            "why_it_matters": "Budgets, vendor availability, and timelines vary significantly by locale and currency, affecting prompt defaults and guidance quality.",
+            "recommended_default": "Region: United States; Currency: USD",
+            "default_reasoning": "US/ USD are broadly recognizable defaults when no locale is provided; they provide a consistent baseline for budget examples and vendor categories without overfitting to a niche market."
+          }
+        ]
+      },
+      "working_prompt_after": "turn Crucible into a chatbot that helps users plan their wedding\n\n### Refinements\n\n#### Critical Severity:\n- Replace the original request with: Objective: Use Crucible to harden and scope a robust system prompt for a separate wedding-planning chatbot. Do not convert Crucible itself into a chatbot. Boundaries: - Crucible remains an adversarial prompt-hardening engine; do not propose changes to its APIs, UI, runtime, or storage. - Operate only on refining the target chatbot's prompt and requirements text. Deliverable: - A final synthesized wedding-planning chatbot prompt suitable for use with a general LLM.\n\n#### Important Severity:\n- Add explicit grounding and corpus instructions to the prompt: Grounding and corpus: - This session will upload a wedding-planner codebase/spec as the corpus. All proposals must include groundednessCitation paths into that corpus. - Do not fabricate citations; if a requirement exists only in this prompt, cite 'original spec'. - If a necessary detail is missing from the corpus, ask one high-impact question via the Human-in-the-Loop protocol; if Questions Mode is ON, accept the recommended default.\n- Add an operational note to the prompt: To run this session, upload at least one file in the wedding-planner corpus; if no corpus can be provided right now, restrict proposals to prompt-only changes and use 'original spec' for groundednessCitation.\n- Add a concise questions policy to the prompt: Human-in-the-Loop: Use sparingly for fundamental ambiguities (e.g., target audience/region, currency for budgets). Every question must include a recommended_default and default_reasoning per the Questions-for-Human protocol.\n\n#### Minor Severity:\n- Clarify explicit out-of-scope items in the prompt: Out of scope for this debate: turning Crucible into a chatbot, adding conversational UI to Crucible, or modifying Crucible\u2019s backend endpoints. The scope is limited to refining the wedding-planning chatbot\u2019s prompt.\n- Add a question to the human: 'The original request provides no technical feature scope for the wedding-planning chatbot. Should the debate assume a minimal representative feature set to make the prompt testable and concrete, or should the hardened prompt remain feature-agnostic and focus on general chatbot interaction quality?' Recommended default: Assume a minimal feature set (timeline generation, budget tracking, vendor shortlisting) to enable grounded proposals. Default reasoning: A feature-agnostic prompt is too abstract to harden meaningfully; scoping to representative capabilities makes the debate actionable without overcommitting to specific implementation choices.",
+      "scores_this_round": {
+        "defender": 0.0,
+        "challenger": 28.2
+      }
+    },
+    {
+      "number": 3,
+      "defender_turn": {
+        "summary": "Round 3 \u2014 Defender: Scoring opponent proposals and flagging critical scope violation. The original prompt asks to turn Crucible into a chatbot, which violates Crucible's established purpose as an adversarial prompt-hardening engine. This is a scope-at-purpose failure and must be rejected.",
+        "opponent_scores": [
+          {
+            "proposal_id": "C-R2-P1",
+            "verdict": "accept",
+            "reasoning": "This proposal correctly enforces Scope-at-Purpose evaluation by requiring citations to the repository's stated purpose when rejecting out-of-scope changes. It is grounded in README.md, which establishes Crucible as a prompt-hardening engine, not a chatbot. The severity is appropriate and the proposal directly addresses the critical flaw in the original prompt.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R2-P2",
+            "verdict": "accept",
+            "reasoning": "This proposal provides concrete deliverable structure for the target wedding-planning chatbot prompt. It specifies required sections (role, capabilities, safety limits, interaction style, parameterization, output format) and maintains implementation-agnostic design. The deliverable structure is testable and executable, addressing the vagueness in the original prompt.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R2-P3",
+            "verdict": "accept",
+            "reasoning": "This proposal adds precision to operational boundaries by explicitly naming the FastAPI endpoints, SSE streaming, and SQLite persistence as out of scope. It is grounded in backend/main.py and prevents misinterpretation of what 'do not modify Crucible' means. The concrete citations make the boundary enforceable.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R2-P4",
+            "verdict": "accept",
+            "reasoning": "This proposal establishes clear acceptance criteria for the final synthesized prompt: self-contained, immediately usable with a general LLM, and no assumed runtime tools unless explicitly provided. It is grounded in README.md's Winner-Writes-Final Synthesis feature and ensures the deliverable is actually deliverable.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R2-P5",
+            "verdict": "accept",
+            "reasoning": "This proposal enforces citation discipline by preventing conflation of Crucible's internal files with the target chatbot's domain logic. It correctly requires wedding-domain behaviors to be justified only from the wedding-planner corpus, not from Crucible's repository. This prevents the adversaries from using Crucible's adversary.py or orchestrator.py to justify wedding-planning features.",
+            "modification": null
+          }
+        ],
+        "new_proposals": [
+          {
+            "id": "D-R3-P1",
+            "adversary": "defender",
+            "text": "CRITICAL SCOPE VIOLATION \u2014 The original prompt 'turn Crucible into a chatbot that helps users plan their wedding' violates Crucible's established application purpose. Per README.md: 'Crucible is an adversarial prompt-hardening engine designed to optimize Antigravity prompts against a codebase corpus through structured debate between LLM adversaries.' Turning Crucible into a wedding-planning chatbot changes its application purpose from prompt-hardening to domain-specific user assistance. This is a scope-at-purpose failure. REQUIRED CORRECTION: Reject the original prompt as written and replace it with: 'Use Crucible to harden and scope a robust system prompt for a separate wedding-planning chatbot application. Do not modify Crucible's codebase, runtime, or APIs. The debate should refine only the target chatbot's prompt text and requirements.' If the human confirms this is the intended task, proceed with that corrected scope. If the human intended something else, escalate for clarification.",
+            "severity": "critical",
+            "groundednessCitation": "README.md: 'Crucible is an adversarial prompt-hardening engine'",
+            "reasoning": "The original prompt directly contradicts Crucible's established purpose. This is not a feature extension\u2014it is a purpose change. Per the Scope-at-Purpose Evaluation protocol, changes to the application's purpose are out of scope and must be flagged as critical severity with a clear citation. The corpus establishes Crucible as a prompt-hardening engine for Antigravity prompts, not as a domain-specific chatbot. The original prompt must be rejected and the human must confirm the intended scope."
+          },
+          {
+            "id": "D-R3-P2",
+            "adversary": "defender",
+            "text": "Add to Grounding and corpus section: 'If the uploaded corpus is empty or contains only Crucible's own repository files, the debate cannot proceed. The adversaries must have a wedding-planner codebase or spec document to ground domain-specific proposals. If no such corpus is provided, the debate must terminate with an error message: ERROR: No wedding-planner corpus uploaded. Crucible requires a target application corpus to harden prompts against. Please upload wedding-planner requirements, specs, or codebase files and restart the session.'",
+            "severity": "critical",
+            "groundednessCitation": "README.md: 'Crucible is designed to optimize Antigravity prompts against a codebase corpus'",
+            "reasoning": "The working prompt assumes a wedding-planner corpus will be uploaded, but does not specify what happens if it is not. The corpus is not optional\u2014it is the foundation for grounding all proposals. Without it, the debate produces ungrounded, fabricated domain requirements. This is an executability flaw: the prompt cannot be executed as written if no corpus is provided. Severity is critical because running the debate without a corpus violates the core grounding discipline."
+          },
+          {
+            "id": "D-R3-P3",
+            "adversary": "defender",
+            "text": "Replace the Questions policy section with: 'Human-in-the-Loop Questions Protocol: (1) Questions are reserved for fundamental ambiguities that cannot be resolved from the corpus alone (e.g., target audience demographics, regulatory compliance requirements, supported payment methods, vendor API integrations). (2) Do NOT ask questions about Crucible's internal behavior\u2014those are out of scope. (3) Every question must include: (a) the question in plain English, (b) why_it_matters (one sentence), (c) recommended_default (your assumed answer if the human does not respond), (d) default_reasoning (justification for that default). (4) Limit to one high-impact question per adversary per round unless a prior question's answer creates a new blocking ambiguity. (5) If Questions Mode is ON, the orchestrator will auto-answer using recommended_default without pausing. If Questions Mode is OFF, the orchestrator will pause the debate and wait for human input.'",
+            "severity": "important",
+            "groundednessCitation": "README.md: Phase 4 Human-in-the-Loop and Scope Evaluation; backend/orchestrator.py: handle_turn_questions function",
+            "reasoning": "The current Questions policy in the working prompt is incomplete and does not specify what qualifies as a valid question scope. Without explicit boundaries, adversaries might ask questions about Crucible's internal plumbing (e.g., 'Should we modify the SSE streaming protocol?'), which is out of scope. This refinement explicitly restricts questions to the target chatbot's domain and aligns with the implemented questions_mode logic in the orchestrator. It also clarifies the one-question-per-turn guideline to prevent question spam."
+          }
+        ],
+        "disagreements": [],
+        "questions_for_human": [
+          {
+            "question": "The original prompt asks to 'turn Crucible into a chatbot that helps users plan their wedding.' Is this a mistake, or do you actually want to modify Crucible's codebase and runtime to become a wedding-planning application?",
+            "why_it_matters": "This determines whether the entire debate scope is valid. If you want to modify Crucible itself, that is a scope-at-purpose violation and the debate cannot proceed as configured.",
+            "recommended_default": "Assume the prompt is a mistake and reject it as out of scope. Replace it with: 'Use Crucible to harden a system prompt for a separate wedding-planning chatbot. Do not modify Crucible's codebase.'",
+            "default_reasoning": "Crucible's established purpose (per README.md) is to harden prompts through adversarial debate, not to become a domain-specific chatbot. The most reasonable interpretation is that the user wants to use Crucible to refine a wedding-chatbot prompt, not to convert Crucible itself into a wedding chatbot."
+          }
+        ]
+      },
+      "challenger_turn": {
+        "summary": "Scored opponent's three proposals: rejected the redundant scope-fix (already present), modified the corpus-handling proposal to align with backend behavior and forbid prompt-only fallback, and modified the questions policy to augment (not replace) with explicit domain-only scope and a per-round cap. Added new proposals to correct the Operational note (backend requires files), require a corpus sanity check gate, and ensure the final synthesized prompt is free of Crucible artifacts; also added default region/currency placeholders based on session defaults.",
+        "opponent_scores": [
+          {
+            "proposal_id": "D-R3-P1",
+            "verdict": "reject",
+            "reasoning": "Redundant. The working prompt already replaces the original request with a scope-correct objective and adds Scope-at-Purpose enforcement. Prior Clarifications also instruct to assume the original request is a mistake and replace it. Accepting this would duplicate what is already in place.",
+            "modification": ""
+          },
+          {
+            "proposal_id": "D-R3-P2",
+            "verdict": "modify",
+            "reasoning": "Directionally correct but needs alignment with actual backend behavior and existing prompt text. The backend rejects starting a new session without files (400 'No files uploaded'), so the 'terminate with error' path should reflect that. Also, our current Operational note incorrectly suggests a prompt-only fallback; this needs to be removed. Additionally handle the case where only Crucible repo files are uploaded by halting domain proposals and surfacing a clear error.",
+            "modification": "Revise Grounding and corpus section to: 'Corpus requirement enforcement: Starting a new Crucible session requires at least one uploaded file; empty uploads are rejected by the backend (400 \"No files uploaded\"). Therefore, this session must include at least one wedding-planner corpus file (requirements/specs/code). If the uploaded corpus contains only Crucible's repository files or otherwise lacks wedding-planner materials, adversaries must halt domain-specific proposals and surface: Invalid corpus: contains no wedding-planner materials. Please upload wedding-planner requirements/specs/code and restart. Do not proceed with prompt-only hardening in the absence of a valid target corpus.'"
+          },
+          {
+            "proposal_id": "D-R3-P3",
+            "verdict": "modify",
+            "reasoning": "Good tightening of question scope, but it should augment (not replace) the existing concise questions policy already in the working prompt. Integrate an explicit prohibition on Crucible-internal questions and add a one-question-per-adversary-per-round cap while preserving the existing required fields and Questions Mode behavior.",
+            "modification": "Augment the existing Human-in-the-Loop Questions policy with: (a) Scope: Questions must be limited to the target wedding-planning chatbot domain (e.g., audience, regulatory constraints, supported payments, vendor integrations). Do NOT ask about Crucible\u2019s internal APIs, SSE streaming, or persistence\u2014these are out of scope. (b) Rate-limit: Max one high-impact question per adversary per round unless the previous answer introduces a new blocking ambiguity. (c) Required fields per question remain: question, why_it_matters, recommended_default, default_reasoning. (d) Execution: If Questions Mode is ON, the orchestrator auto-answers with recommended_default; if OFF, it pauses until answered."
+          }
+        ],
+        "new_proposals": [
+          {
+            "id": "C-R3-P1",
+            "adversary": "challenger",
+            "text": "Replace the current Operational note with: 'Operational note: Starting a new Crucible session requires at least one uploaded file; the backend rejects empty uploads with HTTP 400 \"No files uploaded.\" This session must therefore include at least one wedding-planner corpus file (requirements, specs, or code). If the uploaded files are only Crucible repository files or otherwise contain no wedding-planner materials, adversaries must halt domain-specific proposals and surface: Invalid corpus: contains no wedding-planner materials. Please upload wedding-planner requirements/specs/code and restart. Do not proceed with prompt-only changes in lieu of a valid corpus.'",
+            "severity": "important",
+            "groundednessCitation": "backend/main.py:start_or_resume_debate \u2014 lines validating uploads and returning 400 'No files uploaded'",
+            "reasoning": "The current note incorrectly allows a prompt-only fallback, which contradicts backend enforcement and risks ungrounded proposals. Aligning the prompt with actual API behavior prevents execution-time contradictions."
+          },
+          {
+            "id": "C-R3-P2",
+            "adversary": "challenger",
+            "text": "Add a brief corpus sanity-check gate to Grounding and corpus: 'Before proposing domain-specific changes, verify the corpus clearly pertains to wedding planning (e.g., presence of wedding-planner requirements/specs/code). If this cannot be established from the uploaded files, halt domain proposals and surface the Invalid corpus message defined above.'",
+            "severity": "important",
+            "groundednessCitation": "README.md \u2014 'optimize ... against a codebase corpus' and Phase 4 grounding discipline",
+            "reasoning": "Forcing a quick domain sanity check prevents hallucinated requirements when the uploaded files are irrelevant or incomplete."
+          },
+          {
+            "id": "C-R3-P3",
+            "adversary": "challenger",
+            "text": "Add to Deliverable structure: 'Final prompt hygiene: The synthesized wedding-planning chatbot system prompt must not include Crucible debate artifacts (proposal IDs, groundedness citations, repository paths, or SSE/endpoint references). It must be clean, self-contained, and implementation-agnostic.'",
+            "severity": "minor",
+            "groundednessCitation": "original spec",
+            "reasoning": "Ensures the final deliverable is directly usable as a chatbot system prompt without leaking internal debate scaffolding."
+          },
+          {
+            "id": "C-R3-P4",
+            "adversary": "challenger",
+            "text": "Parameterization defaults: 'When the user does not specify them, default placeholders to {region}=United States and {currency}=USD, unless the runtime provides overrides or the corpus specifies different defaults.'",
+            "severity": "minor",
+            "groundednessCitation": "original spec",
+            "reasoning": "Encodes the agreed session defaults into the synthesized prompt so the chatbot behaves deterministically when users omit these parameters."
+          }
+        ],
+        "disagreements": [],
+        "questions_for_human": []
+      },
+      "working_prompt_after": "turn Crucible into a chatbot that helps users plan their wedding\n\n### Refinements\n\n#### Critical Severity:\n- Replace the original request with: Objective: Use Crucible to harden and scope a robust system prompt for a separate wedding-planning chatbot. Do not convert Crucible itself into a chatbot. Boundaries: - Crucible remains an adversarial prompt-hardening engine; do not propose changes to its APIs, UI, runtime, or storage. - Operate only on refining the target chatbot's prompt and requirements text. Deliverable: - A final synthesized wedding-planning chatbot prompt suitable for use with a general LLM.\n- Revise Grounding and corpus section to: 'Corpus requirement enforcement: Starting a new Crucible session requires at least one uploaded file; empty uploads are rejected by the backend (400 \"No files uploaded\"). Therefore, this session must include at least one wedding-planner corpus file (requirements/specs/code). If the uploaded corpus contains only Crucible's repository files or otherwise lacks wedding-planner materials, adversaries must halt domain-specific proposals and surface: Invalid corpus: contains no wedding-planner materials. Please upload wedding-planner requirements/specs/code and restart. Do not proceed with prompt-only hardening in the absence of a valid target corpus.'\n\n#### Important Severity:\n- Add explicit grounding and corpus instructions to the prompt: Grounding and corpus: - This session will upload a wedding-planner codebase/spec as the corpus. All proposals must include groundednessCitation paths into that corpus. - Do not fabricate citations; if a requirement exists only in this prompt, cite 'original spec'. - If a necessary detail is missing from the corpus, ask one high-impact question via the Human-in-the-Loop protocol; if Questions Mode is ON, accept the recommended default.\n- Add an operational note to the prompt: To run this session, upload at least one file in the wedding-planner corpus; if no corpus can be provided right now, restrict proposals to prompt-only changes and use 'original spec' for groundednessCitation.\n- Add a concise questions policy to the prompt: Human-in-the-Loop: Use sparingly for fundamental ambiguities (e.g., target audience/region, currency for budgets). Every question must include a recommended_default and default_reasoning per the Questions-for-Human protocol.\n- Add to Boundaries: Scope-at-Purpose enforcement \u2014 If any proposal attempts to convert Crucible itself into a chatbot or otherwise change its application purpose, flag it as critical severity and reject it with a clear citation to the repository\u2019s stated purpose.\n- Deliverable structure: The final output must be a single, copy-pasteable system prompt for the separate wedding-planning chatbot, organized as: (1) Role and objectives; (2) Supported capabilities (at minimum: timeline generation, budget tracking, vendor shortlisting); (3) Safety and scope limits (what the chatbot must refuse or defer); (4) Interaction style and key clarification questions it should ask; (5) Parameterization placeholders the runtime can fill (e.g., {region}, {currency}, {wedding_date}, {guest_count}, {budget}); (6) Output format expectations. Keep the prompt implementation-agnostic and tool-free unless a tools spec is provided.\n- Augment the existing Human-in-the-Loop Questions policy with: (a) Scope: Questions must be limited to the target wedding-planning chatbot domain (e.g., audience, regulatory constraints, supported payments, vendor integrations). Do NOT ask about Crucible\u2019s internal APIs, SSE streaming, or persistence\u2014these are out of scope. (b) Rate-limit: Max one high-impact question per adversary per round unless the previous answer introduces a new blocking ambiguity. (c) Required fields per question remain: question, why_it_matters, recommended_default, default_reasoning. (d) Execution: If Questions Mode is ON, the orchestrator auto-answers with recommended_default; if OFF, it pauses until answered.\n\n#### Minor Severity:\n- Clarify explicit out-of-scope items in the prompt: Out of scope for this debate: turning Crucible into a chatbot, adding conversational UI to Crucible, or modifying Crucible\u2019s backend endpoints. The scope is limited to refining the wedding-planning chatbot\u2019s prompt.\n- Add a question to the human: 'The original request provides no technical feature scope for the wedding-planning chatbot. Should the debate assume a minimal representative feature set to make the prompt testable and concrete, or should the hardened prompt remain feature-agnostic and focus on general chatbot interaction quality?' Recommended default: Assume a minimal feature set (timeline generation, budget tracking, vendor shortlisting) to enable grounded proposals. Default reasoning: A feature-agnostic prompt is too abstract to harden meaningfully; scoping to representative capabilities makes the debate actionable without overcommitting to specific implementation choices.\n- Operational boundaries (precision): Do not suggest any modifications to Crucible\u2019s FastAPI endpoints or runtime plumbing (e.g., /api/sessions/stream, /api/sessions/active, /api/sessions/{id}, /api/sessions/{id}/answers, /api/sessions/{id}/pending-questions), SSE streaming, or SQLite persistence/resumption.\n- Acceptance: The final synthesized wedding-planning chatbot prompt must be self-contained (no external file references), immediately usable with a general LLM, and must not assume any runtime tools or APIs unless explicitly provided in the uploaded wedding-planner corpus or clarified by the human.\n- Grounding discipline: When justifying wedding-domain behaviors or requirements, cite only the uploaded wedding-planner corpus; do not use Crucible\u2019s repository files as justification for target chatbot domain behavior. If no wedding-planner corpus detail exists, cite 'original spec' or ask one high-impact human question per the Questions policy.",
+      "scores_this_round": {
+        "defender": 9.0,
+        "challenger": 16.0
+      }
+    },
+    {
+      "number": 4,
+      "defender_turn": {
+        "summary": "Round 4 Defender turn: scoring all Challenger R3 proposals and flagging a critical corpus-validity enforcement gap.",
+        "opponent_scores": [
+          {
+            "proposal_id": "C-R3-P1",
+            "verdict": "accept",
+            "reasoning": "Challenger correctly identifies that the current operational note permits a prompt-only fallback (\"restrict proposals to prompt-only changes and use 'original spec'\") which directly contradicts the backend's file upload requirement enforcement (HTTP 400 \"No files uploaded\"). The proposed replacement enforces the corpus requirement consistently and mandates halting with a clear error message if the corpus is invalid. Grounded in backend/main.py upload validation. This eliminates a critical execution-time contradiction.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R3-P2",
+            "verdict": "accept",
+            "reasoning": "This proposal establishes a mandatory sanity-check gate to verify the corpus is actually wedding-planning-related before allowing domain-specific proposals. The current prompt lacks any mechanism to prevent adversaries from proceeding with fabricated wedding requirements when given an irrelevant corpus. Grounded in README.md's \"optimize ... against a codebase corpus\" principle and Phase 4 grounding discipline. This is a necessary guard against hallucinated proposals.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R3-P3",
+            "verdict": "accept",
+            "reasoning": "The deliverable structure currently does not explicitly prohibit leaking debate scaffolding (proposal IDs, groundedness citations, repository paths) into the final synthesized prompt. This proposal adds a hygiene requirement ensuring the final output is clean and directly usable as a chatbot system prompt. Grounded in original spec's implicit expectation of a usable deliverable. This is a reasonable quality gate.",
+            "modification": null
+          },
+          {
+            "proposal_id": "C-R3-P4",
+            "verdict": "accept",
+            "reasoning": "The session has already established default region=United States and currency=USD via prior Q&A (see Prior Clarifications in the working prompt). This proposal encodes those defaults directly into the synthesized prompt's parameterization section so the chatbot behaves deterministically when users omit them. Grounded in original spec. This is a minor but correct implementation of the agreed defaults.",
+            "modification": null
+          }
+        ],
+        "new_proposals": [
+          {
+            "id": "D-R4-P1",
+            "adversary": "defender",
+            "text": "Add to the corpus requirement enforcement section: 'Corpus domain verification: Upon receiving the uploaded corpus, adversaries must first scan the file paths and content for wedding-planner domain indicators (e.g., file names containing \"wedding\", \"venue\", \"budget\", \"vendor\"; code mentioning wedding-related entities; requirements referencing wedding-planning features). If no such indicators are found, immediately surface: Invalid corpus: uploaded files do not appear to contain wedding-planner materials. The corpus includes only [list actual file types found, e.g., \"Crucible repository code\"]. Please upload wedding-planner requirements/specs/code and restart. Do not proceed with any domain-specific proposals. If domain indicators ARE found, cite specific file paths in all wedding-domain proposals.'",
+            "severity": "critical",
+            "groundednessCitation": "backend/main.py:start_or_resume_debate \u2014 enforces file upload requirement; README.md \u2014 \"optimize ... against a codebase corpus\"",
+            "reasoning": "The current prompt establishes that the corpus must contain wedding-planner materials but provides no operational mechanism to verify this before proposals begin. The Challenger's C-R3-P2 adds a sanity-check gate but does not specify HOW to perform the check or WHAT to do if the check fails. This proposal closes the gap by mandating a concrete verification step (scan for domain indicators) and a specific halt condition with actionable feedback (listing what was actually found). Without this, adversaries could silently proceed with ungrounded proposals against an irrelevant corpus, violating the grounding discipline that is foundational to Crucible's purpose. This is critical because it enforces the corpus-grounding contract at execution time, not just in prose."
+          },
+          {
+            "id": "D-R4-P2",
+            "adversary": "defender",
+            "text": "Add to Deliverable structure, immediately after the section defining the six required components: 'Corpus-grounded feature set: The synthesized prompt's capabilities section (item 2) must cite specific file paths or spec sections from the uploaded wedding-planner corpus to justify each capability. If a capability (e.g., \"timeline generation\", \"vendor shortlisting\") is listed but cannot be grounded in the corpus, flag it as ungrounded and either (a) ask the human whether to include it anyway, or (b) omit it from the final prompt. Do not fabricate capabilities based on general domain knowledge.'",
+            "severity": "important",
+            "groundednessCitation": "README.md \u2014 \"optimize ... against a codebase corpus\"; CRUCIBLE_SPEC.md Phase 4 grounding discipline",
+            "reasoning": "The current Deliverable structure requires the final prompt to include \"Supported capabilities (at minimum: timeline generation, budget tracking, vendor shortlisting)\" but does NOT require these capabilities to be grounded in the uploaded corpus. This creates a loophole: adversaries could include the \"minimum\" capabilities even if the corpus contains no evidence of them, violating Crucible's core grounding principle. This proposal enforces that every capability in the final prompt must be justified by corpus evidence. If the corpus is incomplete, the adversaries must either ask the human or omit the ungrounded capability. This is important because it closes a major grounding gap in the deliverable specification."
+          }
+        ],
+        "disagreements": [],
+        "questions_for_human": []
+      },
+      "challenger_turn": {
+        "summary": "Scored two opponent proposals; both merit modifications. Tightened the corpus-domain check to avoid redundancy/brittleness and aligned capability-grounding with final prompt hygiene (no citations in the final artifact). Proposed a critical fix to remove a lingering contradictory operational note that still permits prompt-only runs without a corpus, which the backend disallows. Also proposed a boundary to prevent altering the scoring engine via prompt changes.",
+        "opponent_scores": [
+          {
+            "proposal_id": "D-R4-P1",
+            "verdict": "modify",
+            "reasoning": "Reinforces valid-corpus enforcement consistent with the backend\u2019s 400 'No files uploaded' behavior and Crucible\u2019s corpus-grounding purpose (README.md). However, parts are redundant with existing requirements (all proposals already require groundedness citations), and prescribing a fixed keyword list is brittle. We should require a lightweight domain-evidence scan and clear halt messaging, while avoiding duplication and unnecessary rigidity. Also, explicitly list representative file paths found to aid debugging.",
+            "modification": "Add to the corpus requirement enforcement section: 'Corpus domain verification: Upon receiving the uploaded corpus, adversaries must perform a lightweight domain-evidence scan across filenames/paths and file contents for clear wedding-planning indicators (examples: filenames or text referencing \u201cwedding\u201d, \u201cvenue\u201d, \u201cguest list\u201d, \u201cbudget\u201d, \u201cvendor\u201d, \u201cRSVP\u201d). If no indicators are found, immediately surface: Invalid corpus: uploaded files do not appear to contain wedding-planner materials. The corpus includes only: [list representative top-level file and directory names actually found]. Please upload wedding-planner requirements/specs/code and restart. Do not proceed with any wedding-domain proposals. If indicators ARE found, proceed but continue to ground every domain proposal with specific file-path citations as already required.'"
+          },
+          {
+            "proposal_id": "D-R4-P2",
+            "verdict": "modify",
+            "reasoning": "The intent (only include capabilities justified by the uploaded corpus or explicitly authorized by the human) is correct and aligns with Crucible\u2019s grounding principle (README.md). But requiring the final synthesized system prompt to embed repository paths/spec section citations conflicts with the accepted 'Final prompt hygiene' requirement to keep the final prompt clean and free of repository paths/citations (original spec). We should gate capabilities during the debate using citations, but strip citations from the final artifact while limiting capabilities to those vetted.",
+            "modification": "Amend Deliverable structure after the capabilities section: 'Corpus-grounded capabilities only: The final capabilities must be limited to those supported by explicit evidence in the uploaded wedding-planner corpus or explicitly authorized by the human. During the debate, adversaries must maintain citations justifying each capability. In the final synthesized system prompt, omit citations and repository paths (per Final Prompt Hygiene); include only capabilities that were justified or explicitly approved. If a commonly expected capability (e.g., timeline generation, budget tracking, vendor shortlisting) lacks corpus support and no human approval is obtained, omit it from the final prompt rather than fabricating it.'"
+          }
+        ],
+        "new_proposals": [
+          {
+            "id": "C-R4-P1",
+            "adversary": "challenger",
+            "text": "Resolve the operational-note contradiction: Remove any earlier note that permits running prompt-only changes without an uploaded corpus, and keep only the strict requirement: 'Operational note: Starting a new Crucible session requires at least one uploaded file; the backend rejects empty uploads with HTTP 400 \"No files uploaded.\" This session must include at least one wedding-planner corpus file (requirements/specs/code). If the uploaded files contain no wedding-planner materials, halt and surface the Invalid corpus message; do not proceed with prompt-only changes.'",
+            "severity": "critical",
+            "groundednessCitation": "backend/main.py:start_or_resume_debate \u2014 JSONResponse(status_code=400, content={\"error\": \"No files uploaded\"})",
+            "reasoning": "The backend hard-rejects empty uploads, so allowing a prompt-only flow is impossible and contradictory. This fix aligns the prompt with actual runtime constraints and prevents unexecutable instructions."
+          },
+          {
+            "id": "C-R4-P2",
+            "adversary": "challenger",
+            "text": "Boundaries: Do not propose changes to Crucible\u2019s scoring weights, groundedness multipliers, acceptance multipliers, or debate phase structure (e.g., Critical=10, Important=5, Minor=2; groundedness 1.0 vs 0.2; Accept=1.0, Modify=0.6, Reject=0.0; R1 parallel, R2\u2013R5 sequential). These are orchestrator-level mechanics and out of scope for the target chatbot prompt hardening.",
+            "severity": "important",
+            "groundednessCitation": "README.md \u2014 Deterministic Scoring Engine and Sequential Turn Orchestration",
+            "reasoning": "Altering core scoring/orchestration via this debate would change Crucible\u2019s operation, violating scope-at-purpose and causing divergence from the implemented engine."
+          }
+        ],
+        "disagreements": [],
+        "questions_for_human": []
+      },
+      "working_prompt_after": "turn Crucible into a chatbot that helps users plan their wedding\n\n### Refinements\n\n#### Critical Severity:\n- Replace the original request with: Objective: Use Crucible to harden and scope a robust system prompt for a separate wedding-planning chatbot. Do not convert Crucible itself into a chatbot. Boundaries: - Crucible remains an adversarial prompt-hardening engine; do not propose changes to its APIs, UI, runtime, or storage. - Operate only on refining the target chatbot's prompt and requirements text. Deliverable: - A final synthesized wedding-planning chatbot prompt suitable for use with a general LLM.\n- Revise Grounding and corpus section to: 'Corpus requirement enforcement: Starting a new Crucible session requires at least one uploaded file; empty uploads are rejected by the backend (400 \"No files uploaded\"). Therefore, this session must include at least one wedding-planner corpus file (requirements/specs/code). If the uploaded corpus contains only Crucible's repository files or otherwise lacks wedding-planner materials, adversaries must halt domain-specific proposals and surface: Invalid corpus: contains no wedding-planner materials. Please upload wedding-planner requirements/specs/code and restart. Do not proceed with prompt-only hardening in the absence of a valid target corpus.'\n- Add to the corpus requirement enforcement section: 'Corpus domain verification: Upon receiving the uploaded corpus, adversaries must perform a lightweight domain-evidence scan across filenames/paths and file contents for clear wedding-planning indicators (examples: filenames or text referencing \u201cwedding\u201d, \u201cvenue\u201d, \u201cguest list\u201d, \u201cbudget\u201d, \u201cvendor\u201d, \u201cRSVP\u201d). If no indicators are found, immediately surface: Invalid corpus: uploaded files do not appear to contain wedding-planner materials. The corpus includes only: [list representative top-level file and directory names actually found]. Please upload wedding-planner requirements/specs/code and restart. Do not proceed with any wedding-domain proposals. If indicators ARE found, proceed but continue to ground every domain proposal with specific file-path citations as already required.'\n\n#### Important Severity:\n- Add explicit grounding and corpus instructions to the prompt: Grounding and corpus: - This session will upload a wedding-planner codebase/spec as the corpus. All proposals must include groundednessCitation paths into that corpus. - Do not fabricate citations; if a requirement exists only in this prompt, cite 'original spec'. - If a necessary detail is missing from the corpus, ask one high-impact question via the Human-in-the-Loop protocol; if Questions Mode is ON, accept the recommended default.\n- Add an operational note to the prompt: To run this session, upload at least one file in the wedding-planner corpus; if no corpus can be provided right now, restrict proposals to prompt-only changes and use 'original spec' for groundednessCitation.\n- Add a concise questions policy to the prompt: Human-in-the-Loop: Use sparingly for fundamental ambiguities (e.g., target audience/region, currency for budgets). Every question must include a recommended_default and default_reasoning per the Questions-for-Human protocol.\n- Add to Boundaries: Scope-at-Purpose enforcement \u2014 If any proposal attempts to convert Crucible itself into a chatbot or otherwise change its application purpose, flag it as critical severity and reject it with a clear citation to the repository\u2019s stated purpose.\n- Deliverable structure: The final output must be a single, copy-pasteable system prompt for the separate wedding-planning chatbot, organized as: (1) Role and objectives; (2) Supported capabilities (at minimum: timeline generation, budget tracking, vendor shortlisting); (3) Safety and scope limits (what the chatbot must refuse or defer); (4) Interaction style and key clarification questions it should ask; (5) Parameterization placeholders the runtime can fill (e.g., {region}, {currency}, {wedding_date}, {guest_count}, {budget}); (6) Output format expectations. Keep the prompt implementation-agnostic and tool-free unless a tools spec is provided.\n- Augment the existing Human-in-the-Loop Questions policy with: (a) Scope: Questions must be limited to the target wedding-planning chatbot domain (e.g., audience, regulatory constraints, supported payments, vendor integrations). Do NOT ask about Crucible\u2019s internal APIs, SSE streaming, or persistence\u2014these are out of scope. (b) Rate-limit: Max one high-impact question per adversary per round unless the previous answer introduces a new blocking ambiguity. (c) Required fields per question remain: question, why_it_matters, recommended_default, default_reasoning. (d) Execution: If Questions Mode is ON, the orchestrator auto-answers with recommended_default; if OFF, it pauses until answered.\n- Replace the current Operational note with: 'Operational note: Starting a new Crucible session requires at least one uploaded file; the backend rejects empty uploads with HTTP 400 \"No files uploaded.\" This session must therefore include at least one wedding-planner corpus file (requirements, specs, or code). If the uploaded files are only Crucible repository files or otherwise contain no wedding-planner materials, adversaries must halt domain-specific proposals and surface: Invalid corpus: contains no wedding-planner materials. Please upload wedding-planner requirements/specs/code and restart. Do not proceed with prompt-only changes in lieu of a valid corpus.'\n- Add a brief corpus sanity-check gate to Grounding and corpus: 'Before proposing domain-specific changes, verify the corpus clearly pertains to wedding planning (e.g., presence of wedding-planner requirements/specs/code). If this cannot be established from the uploaded files, halt domain proposals and surface the Invalid corpus message defined above.'\n- Amend Deliverable structure after the capabilities section: 'Corpus-grounded capabilities only: The final capabilities must be limited to those supported by explicit evidence in the uploaded wedding-planner corpus or explicitly authorized by the human. During the debate, adversaries must maintain citations justifying each capability. In the final synthesized system prompt, omit citations and repository paths (per Final Prompt Hygiene); include only capabilities that were justified or explicitly approved. If a commonly expected capability (e.g., timeline generation, budget tracking, vendor shortlisting) lacks corpus support and no human approval is obtained, omit it from the final prompt rather than fabricating it.'\n\n#### Minor Severity:\n- Clarify explicit out-of-scope items in the prompt: Out of scope for this debate: turning Crucible into a chatbot, adding conversational UI to Crucible, or modifying Crucible\u2019s backend endpoints. The scope is limited to refining the wedding-planning chatbot\u2019s prompt.\n- Add a question to the human: 'The original request provides no technical feature scope for the wedding-planning chatbot. Should the debate assume a minimal representative feature set to make the prompt testable and concrete, or should the hardened prompt remain feature-agnostic and focus on general chatbot interaction quality?' Recommended default: Assume a minimal feature set (timeline generation, budget tracking, vendor shortlisting) to enable grounded proposals. Default reasoning: A feature-agnostic prompt is too abstract to harden meaningfully; scoping to representative capabilities makes the debate actionable without overcommitting to specific implementation choices.\n- Operational boundaries (precision): Do not suggest any modifications to Crucible\u2019s FastAPI endpoints or runtime plumbing (e.g., /api/sessions/stream, /api/sessions/active, /api/sessions/{id}, /api/sessions/{id}/answers, /api/sessions/{id}/pending-questions), SSE streaming, or SQLite persistence/resumption.\n- Acceptance: The final synthesized wedding-planning chatbot prompt must be self-contained (no external file references), immediately usable with a general LLM, and must not assume any runtime tools or APIs unless explicitly provided in the uploaded wedding-planner corpus or clarified by the human.\n- Grounding discipline: When justifying wedding-domain behaviors or requirements, cite only the uploaded wedding-planner corpus; do not use Crucible\u2019s repository files as justification for target chatbot domain behavior. If no wedding-planner corpus detail exists, cite 'original spec' or ask one high-impact human question per the Questions policy.\n- Add to Deliverable structure: 'Final prompt hygiene: The synthesized wedding-planning chatbot system prompt must not include Crucible debate artifacts (proposal IDs, groundedness citations, repository paths, or SSE/endpoint references). It must be clean, self-contained, and implementation-agnostic.'\n- Parameterization defaults: 'When the user does not specify them, default placeholders to {region}=United States and {currency}=USD, unless the runtime provides overrides or the corpus specifies different defaults.'",
+      "scores_this_round": {
+        "defender": 9.0,
+        "challenger": 14.0
+      }
+    }
+  ]
+}

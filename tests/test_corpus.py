@@ -38,3 +38,25 @@ async def test_path_traversal_mitigation():
         assert len(scanned) == 1
         assert scanned[0]["path"] == "evil.txt"
         assert scanned[0]["content"] == "malicious content"
+
+def test_load_pre_built_corpus():
+    from backend.corpus import load_pre_built_corpus
+    
+    # 1. Valid corpus string with evidence tags
+    valid_corpus = '<evidence path="main.py">\nprint("hello")\n</evidence>'
+    assert load_pre_built_corpus(valid_corpus) == valid_corpus
+    
+    # 2. Empty or whitespace corpus
+    with pytest.raises(ValueError) as excinfo:
+        load_pre_built_corpus("")
+    assert "it does not appear to be a Tumbler-built bundle" in str(excinfo.value)
+    
+    with pytest.raises(ValueError) as excinfo:
+        load_pre_built_corpus("   \n   ")
+    assert "it does not appear to be a Tumbler-built bundle" in str(excinfo.value)
+    
+    # 3. Non-empty but missing evidence tags
+    with pytest.raises(ValueError) as excinfo:
+        load_pre_built_corpus("print('hello world')")
+    assert "it does not appear to be a Tumbler-built bundle" in str(excinfo.value)
+

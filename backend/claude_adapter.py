@@ -1,6 +1,14 @@
+"""
+
+DEV MODELS — using cheap tier for Phase 3 development.
+Swap to claude-sonnet-4-5 / gpt-5 for gate verification and demos.
+See CRUCIBLE_SPEC.md Phase 3 gate criterion 2.
+
+"""
 import os
 import json
 import logging
+from typing import Any, Union
 from anthropic import AsyncAnthropic
 from .schemas import AdversaryResponse
 
@@ -19,11 +27,17 @@ def clean_json_string(text: str) -> str:
             text = text[:-3].strip()
     return text
 
-async def call_claude_adversary(system_prompt: str, user_prompt: str, corpus: str) -> AdversaryResponse:
+async def call_claude_adversary(
+    system_prompt: str,
+    user_prompt: str,
+    corpus: str,
+    response_model: Any = AdversaryResponse,
+    raw_text: bool = False
+) -> Any:
     """
     Calls the Claude adversary asynchronously using the AsyncAnthropic client.
     Reads ANTHROPIC_API_KEY from environment variables at call time.
-    Validates that the output conforms to the structured JSON schema.
+    If raw_text is True, returns raw string text response; otherwise parses and validates using response_model.
     """
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
@@ -31,10 +45,15 @@ async def call_claude_adversary(system_prompt: str, user_prompt: str, corpus: st
         
     client = AsyncAnthropic(api_key=api_key)
     
-    user_content = f"Original Prompt:\n{user_prompt}\n\nCodebase Corpus:\n{corpus}"
+    # In synthesis, user_prompt contains the compiled user prompt + corpus + history
+    if raw_text and not corpus:
+        user_content = user_prompt
+    else:
+        user_content = f"Original Prompt:\n{user_prompt}\n\nCodebase Corpus:\n{corpus}"
     
+    model = os.environ.get("CRUCIBLE_CLAUDE_MODEL", "claude-sonnet-4-5")
     response = await client.messages.create(
-        model="claude-sonnet-4-5",
+        model=model,
         max_tokens=4000,
         system=system_prompt,
         messages=[
@@ -50,9 +69,12 @@ async def call_claude_adversary(system_prompt: str, user_prompt: str, corpus: st
         logger.info(f"Claude — The Defender token usage: input={input_tokens}, output={output_tokens}")
         print(f"Claude — The Defender token usage: input={input_tokens}, output={output_tokens}")
         
+    if raw_text:
+        return content
+        
     cleaned_content = clean_json_string(content)
     try:
         data = json.loads(cleaned_content)
-        return AdversaryResponse.model_validate(data)
+        return response_model.model_validate(data)
     except Exception as e:
         raise ValueError(f"The Claude — The Defender returned malformed JSON: {e}")

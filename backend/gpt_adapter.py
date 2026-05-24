@@ -1,6 +1,14 @@
+"""
+
+DEV MODELS — using cheap tier for Phase 3 development.
+Swap to claude-sonnet-4-5 / gpt-5 for gate verification and demos.
+See CRUCIBLE_SPEC.md Phase 3 gate criterion 2.
+
+"""
 import os
 import json
 import logging
+from typing import Any, Union
 from openai import AsyncOpenAI
 from .schemas import AdversaryResponse
 
@@ -19,11 +27,17 @@ def clean_json_string(text: str) -> str:
             text = text[:-3].strip()
     return text
 
-async def call_gpt_adversary(system_prompt: str, user_prompt: str, corpus: str) -> AdversaryResponse:
+async def call_gpt_adversary(
+    system_prompt: str,
+    user_prompt: str,
+    corpus: str,
+    response_model: Any = AdversaryResponse,
+    raw_text: bool = False
+) -> Any:
     """
     Calls the GPT adversary asynchronously using the AsyncOpenAI client.
     Reads OPENAI_API_KEY from environment variables at call time.
-    Validates that the output conforms to the structured JSON schema.
+    If raw_text is True, returns raw string text response; otherwise parses and validates using response_model.
     """
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
@@ -31,16 +45,23 @@ async def call_gpt_adversary(system_prompt: str, user_prompt: str, corpus: str) 
         
     client = AsyncOpenAI(api_key=api_key)
     
-    user_content = f"Original Prompt:\n{user_prompt}\n\nCodebase Corpus:\n{corpus}"
+    if raw_text and not corpus:
+        user_content = user_prompt
+    else:
+        user_content = f"Original Prompt:\n{user_prompt}\n\nCodebase Corpus:\n{corpus}"
     
-    response = await client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
+    model = os.environ.get("CRUCIBLE_GPT_MODEL", "gpt-5")
+    kwargs = {
+        "model": model,
+        "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_content}
-        ],
-        response_format={"type": "json_object"}
-    )
+        ]
+    }
+    if not raw_text:
+        kwargs["response_format"] = {"type": "json_object"}
+        
+    response = await client.chat.completions.create(**kwargs)
     
     content = response.choices[0].message.content
     usage = response.usage
@@ -50,9 +71,12 @@ async def call_gpt_adversary(system_prompt: str, user_prompt: str, corpus: str) 
         logger.info(f"GPT — The Challenger token usage: input={input_tokens}, output={output_tokens}")
         print(f"GPT — The Challenger token usage: input={input_tokens}, output={output_tokens}")
         
+    if raw_text:
+        return content
+        
     cleaned_content = clean_json_string(content)
     try:
         data = json.loads(cleaned_content)
-        return AdversaryResponse.model_validate(data)
+        return response_model.model_validate(data)
     except Exception as e:
         raise ValueError(f"The GPT — The Challenger returned malformed JSON: {e}")

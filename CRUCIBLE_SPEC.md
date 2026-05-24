@@ -249,7 +249,7 @@ The adversaries determine the application's purpose by reading the README, the s
 
 ### Phase 2 — Adversaries and Personas
 
-**Phase Transition Status:** Phase 1 was successfully completed and gate-verified. We are now in Phase 2. Features that were excluded in Phase 1 (GPT integration, personas, anti-sycophancy) are now actively built in this phase, maintaining compliance with the atomic build rules.
+**Phase Transition Status:** Phase 2 was successfully completed and gate-verified.
 
 **Goal:** Both adversaries running with their personas and the anti-sycophancy protocol, but in parallel-only mode (no debate yet, no scoring). Proves the LLM contracts work.
 
@@ -278,6 +278,8 @@ The adversaries determine the application's purpose by reading the README, the s
 
 ### Phase 3 — Sequential Debate and Scoring
 
+**Phase Transition Status:** Phase 3 was successfully completed and gate-verified.
+
 **Goal:** The full loop. Round 1 parallel → rounds 2+ sequential → deterministic scoring → multi-factor termination → winner writes final synthesis.
 
 **Build:**
@@ -303,6 +305,8 @@ The adversaries determine the application's purpose by reading the README, the s
 5. Tumbler reviewing Phase 3 returns PASS or FIX with only minor findings
 
 ### Phase 4 — Human-in-the-Loop and Scope Evaluation
+
+**Phase Transition Status:** Phase 4 was successfully completed and gate-verified.
 
 **Goal:** Radio-button question handling and explicit scope-at-purpose evaluation.
 
@@ -355,9 +359,13 @@ Things deliberately deferred from V1. Do not pull into V1 phases.
 - Cost tracking / token accounting per session
 - Replay-from-state for completed sessions
 - Configurable scoring weights via UI
+- **Tumbler passes review-derived context alongside the corpus** (inferred application purpose, architectural patterns, PASS-with-minor-findings notes). Crucible's adversaries use this context to start the debate from a sharper baseline.
+- **Tumbler-generated first-draft Antigravity prompts for feature requests.** Tumbler gains a feature mode; the user types an idea, Tumbler converts it to a first-draft prompt informed by the corpus, and the handoff carries the prompt alongside the corpus.
 
 ## Open Questions Tracked for V1
 
 - **OpenAI API key handling.** Same approach as Tumbler's Vertex credentials: env var, fail fast at startup if missing. Add to `.env.example`.
 - **Concurrency.** V1 is single-user, single-session-at-a-time. Reject new sessions while one is running. Concurrency is V2.
 - **Cost.** A full Crucible run on a real codebase will use significant tokens (corpus + prompt × multiple turns × two models). Log token usage per turn for visibility, but do not enforce limits in V1.
+
+Note: V1 is complete.
