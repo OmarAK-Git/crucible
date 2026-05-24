@@ -1089,6 +1089,15 @@
                     ['.git', 'node_modules', '__pycache__', '.venv', 'venv', 'env', 'dist', 'build', '.next', 'out', '.ipynb_checkpoints'].includes(part)
                 );
                 if (isIgnored) continue;
+                
+                const ext = '.' + path.split('.').pop().toLowerCase();
+                const ignoredExtensions = [
+                    '.png', '.jpg', '.jpeg', '.gif', '.pdf', '.zip', '.tar', '.gz', 
+                    '.exe', '.bin', '.so', '.dylib', '.dll', '.db', '.sqlite', 
+                    '.sqlite3', '.db3', '.jsonl', '.pkl', '.pickle', '.pyc', '.pyd'
+                ];
+                if (ignoredExtensions.includes(ext)) continue;
+                
                 formData.append('files', files[i], path);
             }
             const questionsModeValue = document.querySelector('input[name="questionsMode"]:checked').value;

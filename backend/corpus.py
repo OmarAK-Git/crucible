@@ -6,7 +6,7 @@ from fastapi import UploadFile
 IGNORE_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv", "env", "dist", "build", ".next", "out", ".ipynb_checkpoints"}
 MAX_TOTAL_SIZE = 50 * 1024 * 1024
 MAX_FILE_SIZE = 1 * 1024 * 1024
-KNOWN_BINARIES = {".png", ".jpg", ".jpeg", ".gif", ".pdf", ".zip", ".tar", ".gz", ".exe", ".bin", ".so", ".dylib", ".dll"}
+KNOWN_BINARIES = {".png", ".jpg", ".jpeg", ".gif", ".pdf", ".zip", ".tar", ".gz", ".exe", ".bin", ".so", ".dylib", ".dll", ".db", ".sqlite", ".sqlite3", ".db3", ".pkl", ".pickle", ".pyc", ".pyd"}
 
 class UploadTooLargeError(Exception):
     pass
