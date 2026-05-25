@@ -16,7 +16,7 @@ client = TestClient(app)
 @pytest.fixture
 def mock_run_debate():
     with patch("backend.main.run_debate", new_callable=AsyncMock) as mock:
-        async def mock_debate_impl(prompt, corpus, session_id, event_queue, questions_mode="off"):
+        async def mock_debate_impl(prompt, corpus, session_id, event_queue, questions_mode="off", **kwargs):
             # Save a complete mock session to DB so get_session endpoint works
             db.update_session(
                 session_id,

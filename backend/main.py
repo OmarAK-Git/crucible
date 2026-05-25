@@ -25,6 +25,8 @@ class FromTumblerPayload(BaseModel):
     handoff_filename: str
     prompt: str
     questions_mode: str = "off"
+    defender_model: str = "claude-sonnet-4-5"
+    challenger_model: str = "gpt-5"
 
 
 logger = logging.getLogger(__name__)
@@ -44,7 +46,9 @@ async def start_or_resume_debate(
     prompt: str = Form(None),
     files: list[UploadFile] = File(default=[]),
     session_id: str = Form(None),
-    questions_mode: str = Form("off")
+    questions_mode: str = Form("off"),
+    defender_model: str = Form("claude-sonnet-4-5"),
+    challenger_model: str = Form("gpt-5")
 ):
     """
     POST /api/sessions/stream
@@ -71,6 +75,8 @@ async def start_or_resume_debate(
         debate_prompt = state["prompt"]
         debate_corpus = state["corpus"]
         active_session_id = session_id
+        active_defender_model = state.get("defender_model", "claude-sonnet-4-5")
+        active_challenger_model = state.get("challenger_model", "gpt-5")
     else:
         # Start new flow
         # Check concurrency V1 constraint: reject new session if one is already running
@@ -105,7 +111,14 @@ async def start_or_resume_debate(
                 import uuid
                 active_session_id = uuid.uuid4().hex
                 # We save the session record now with status "running" and questions_mode
-                db.create_session(active_session_id, debate_prompt, debate_corpus, questions_mode=questions_mode)
+                db.create_session(
+                    active_session_id, debate_prompt, debate_corpus,
+                    questions_mode=questions_mode,
+                    defender_model=defender_model,
+                    challenger_model=challenger_model
+                )
+                active_defender_model = defender_model
+                active_challenger_model = challenger_model
         except UploadTooLargeError as e:
             return JSONResponse(
                 status_code=413,
@@ -130,7 +143,9 @@ async def start_or_resume_debate(
         corpus=debate_corpus,
         session_id=active_session_id,
         event_queue=event_queue,
-        questions_mode=questions_mode
+        questions_mode=questions_mode,
+        defender_model=active_defender_model,
+        challenger_model=active_challenger_model
     ))
 
     async def event_generator():
@@ -237,6 +252,11 @@ async def post_answer_endpoint(id: str, payload: AnswerPayload):
             break
             
     if not target_q:
+        # Check if the question has already been answered (to handle duplicate submissions gracefully)
+        answered_q = db.get_question(payload.question_id)
+        if answered_q and answered_q["session_id"] == id:
+            return JSONResponse(status_code=200, content={"status": "success", "message": "Answer already saved."})
+            
         raise HTTPException(
             status_code=404,
             detail=f"Pending question {payload.question_id} not found for this session."
@@ -339,7 +359,9 @@ async def create_session_from_tumbler_endpoint(payload: FromTumblerPayload):
         prompt=prompt,
         corpus=corpus_bundle,
         status="running",
-        questions_mode=payload.questions_mode
+        questions_mode=payload.questions_mode,
+        defender_model=payload.defender_model,
+        challenger_model=payload.challenger_model
     )
     
     # Move the handoff file to consumed directory
@@ -355,6 +377,49 @@ async def create_session_from_tumbler_endpoint(payload: FromTumblerPayload):
         # Continue anyway as session is already saved in SQLite
         
     return JSONResponse(status_code=200, content={"session_id": new_session_id})
+
+@app.get("/api/sessions/{id}/debug-export")
+async def get_debug_export_endpoint(id: str):
+    """
+    GET /api/sessions/{id}/debug-export
+    Fetches the entire session state plus all question answers to produce a complete debug JSON.
+    """
+    state = db.load_session_state(id)
+    if not state:
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Session {id} not found."}
+        )
+        
+    # Reconstruct rounds to be dicts
+    serializable_rounds = []
+    for r in state.get("rounds", []):
+        serializable_rounds.append(r.model_dump())
+        
+    # Get all question answers (both pending and completed)
+    import sqlite3
+    conn = db.get_connection()
+    try:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM question_answers WHERE session_id = ? ORDER BY round_number ASC, question_id ASC;", (id,))
+        qas = [dict(row) for row in cur.fetchall()]
+    finally:
+        conn.close()
+        
+    return JSONResponse(status_code=200, content={
+        "session_id": state["session_id"],
+        "prompt": state["prompt"],
+        "corpus": state["corpus"],
+        "status": state["status"],
+        "winner": state["winner"],
+        "termination_reason": state["termination_reason"],
+        "final_prompt": state["final_prompt"],
+        "defender_model": state.get("defender_model"),
+        "challenger_model": state.get("challenger_model"),
+        "rounds": serializable_rounds,
+        "question_answers": qas
+    })
 
 @app.get("/")
 async def serve_index():

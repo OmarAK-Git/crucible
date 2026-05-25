@@ -8,7 +8,7 @@ See CRUCIBLE_SPEC.md Phase 3 gate criterion 2.
 import os
 import json
 import logging
-from typing import Any, Union
+from typing import Any, Union, Optional
 from anthropic import AsyncAnthropic
 from .schemas import AdversaryResponse
 
@@ -32,7 +32,8 @@ async def call_claude_adversary(
     user_prompt: str,
     corpus: str,
     response_model: Any = AdversaryResponse,
-    raw_text: bool = False
+    raw_text: bool = False,
+    model: Optional[str] = None
 ) -> Any:
     """
     Calls the Claude adversary asynchronously using the AsyncAnthropic client.
@@ -51,7 +52,8 @@ async def call_claude_adversary(
     else:
         user_content = f"Original Prompt:\n{user_prompt}\n\nCodebase Corpus:\n{corpus}"
     
-    model = os.environ.get("CRUCIBLE_CLAUDE_MODEL", "claude-sonnet-4-5")
+    if not model:
+        model = os.environ.get("CRUCIBLE_CLAUDE_MODEL", "claude-sonnet-4-5")
     response = await client.messages.create(
         model=model,
         max_tokens=4000,

@@ -5,7 +5,7 @@ from fastapi import UploadFile
 
 IGNORE_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv", "env", "dist", "build", ".next", "out", ".ipynb_checkpoints"}
 MAX_TOTAL_SIZE = 50 * 1024 * 1024
-MAX_FILE_SIZE = 1 * 1024 * 1024
+MAX_FILE_SIZE = 100 * 1024
 KNOWN_BINARIES = {".png", ".jpg", ".jpeg", ".gif", ".pdf", ".zip", ".tar", ".gz", ".exe", ".bin", ".so", ".dylib", ".dll", ".db", ".sqlite", ".sqlite3", ".db3", ".pkl", ".pickle", ".pyc", ".pyd"}
 
 class UploadTooLargeError(Exception):
@@ -22,8 +22,11 @@ async def extract_and_read(temp_dir: Path, upload_files: list[UploadFile]) -> li
         parts = Path(uf.filename).parts
         if any(part in IGNORE_DIRS for part in parts):
             continue
-        safe_filename = Path(uf.filename).name
-        file_path = temp_dir / safe_filename
+        filename_parts = [p for p in Path(uf.filename).parts if p not in ("..", ".", "/", "\\", "")]
+        if not filename_parts:
+            continue
+        safe_rel_path = Path(*filename_parts)
+        file_path = temp_dir / safe_rel_path
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "wb") as f:
             while chunk := await uf.read(8192):

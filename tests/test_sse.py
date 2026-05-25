@@ -9,7 +9,7 @@ client = TestClient(app)
 @pytest.fixture
 def mock_run_debate():
     with patch("backend.main.run_debate", new_callable=AsyncMock) as mock:
-        async def mock_debate_impl(prompt, corpus, session_id, event_queue, questions_mode="off"):
+        async def mock_debate_impl(prompt, corpus, session_id, event_queue, questions_mode="off", **kwargs):
             await event_queue.put(("session_started", {"session_id": session_id, "prompt": prompt}))
             await event_queue.put(("corpus_built", {"file_count": 2, "total_chars": 50}))
             await event_queue.put(("synthesis_completed", {"final_prompt": "Hardened prompt"}))

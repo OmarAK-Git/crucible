@@ -159,6 +159,11 @@
             background-color: rgba(79, 70, 229, 0.03);
         }
 
+        .file-dropzone.dragover {
+            border-color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.08);
+        }
+
         input[type="file"] {
             display: none;
         }
@@ -288,7 +293,6 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 1.5rem;
-            margin-bottom: 1.5rem;
         }
 
         .score-box {
@@ -324,7 +328,6 @@
 
         /* Live Logger */
         .log-card {
-            margin-bottom: 1.5rem;
             background-color: rgba(9, 13, 22, 0.9);
         }
 
@@ -731,6 +734,132 @@
             padding: 0.75rem;
             color: var(--text-secondary);
         }
+
+        .result-container {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Model Selector Dial Styles */
+        .dial-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem;
+            background-color: rgba(9, 13, 22, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-top: 0.5rem;
+            position: relative;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .dial-gauge {
+            position: relative;
+            width: 160px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 0.5rem;
+        }
+
+        .dial-arc {
+            position: absolute;
+            top: 10px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+            box-sizing: border-box;
+        }
+
+        .dial-knob {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, #1f2937, #111827);
+            border: 3px solid var(--border);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.05);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform: rotate(25deg); /* Default pointing to Standard */
+            z-index: 2;
+        }
+
+        .dial-needle {
+            width: 4px;
+            height: 25px;
+            background-color: var(--primary);
+            border-radius: 2px;
+            margin-top: 4px;
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        .dial-label {
+            position: absolute;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.3s, text-shadow 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            user-select: none;
+        }
+
+        .dial-label:hover, .dial-label.active {
+            color: var(--text-primary);
+        }
+
+        .dial-label.active {
+            text-shadow: 0 0 10px var(--primary);
+            color: var(--primary);
+        }
+
+        .dial-label[data-tier="dev"] {
+            bottom: 5px;
+            left: -20px;
+        }
+        .dial-label[data-tier="eco"] {
+            top: 20px;
+            left: -5px;
+        }
+        .dial-label[data-tier="standard"] {
+            top: 20px;
+            right: -5px;
+        }
+        .dial-label[data-tier="premium"] {
+            bottom: 5px;
+            right: -25px;
+        }
+
+        .dial-text {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .dial-tier-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .dial-models-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
     </style>
 </head>
 <body>
@@ -782,6 +911,26 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label>Model Selector Dial</label>
+                    <div class="dial-container">
+                        <div class="dial-gauge">
+                            <div class="dial-arc"></div>
+                            <div class="dial-knob" id="dialKnob">
+                                <div class="dial-needle"></div>
+                            </div>
+                            <div class="dial-label" data-tier="dev">Dev</div>
+                            <div class="dial-label" data-tier="eco">Eco</div>
+                            <div class="dial-label active" data-tier="standard">Std</div>
+                            <div class="dial-label" data-tier="premium">Prem</div>
+                        </div>
+                        <div class="dial-text">
+                            <div class="dial-tier-title" id="activeTierName">Standard Tier (Balanced)</div>
+                            <div class="dial-models-desc" id="activeTierModels">Claude Sonnet 4.5 & GPT-5</div>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit" id="submitBtn" class="submit-btn">Run Crucible</button>
             </form>
         </div>
@@ -813,9 +962,26 @@
                 </div>
             </div>
 
+            <!-- Questions Card -->
+            <div class="card questions-card" id="questionsCard" style="display: none; border-color: var(--primary);">
+                <div class="synthesis-header">
+                    <div class="synthesis-title" id="questionsCardTitle" style="color: var(--primary); font-size: 1.35rem; font-weight: 700;">Questions for the Human</div>
+                </div>
+                <div class="card-body" id="questionsCardBody" style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; margin-bottom: 1rem;">
+                    <!-- Dynamically populated questions -->
+                </div>
+                <div class="synthesis-header" style="justify-content: flex-end; gap: 1rem;">
+                    <div id="questionsCardError" style="color: #fca5a5; font-size: 0.9rem; flex-grow: 1; align-self: center; display: none;"></div>
+                    <button class="copy-btn" id="submitAnswersBtn">Submit Answers</button>
+                </div>
+            </div>
+
             <!-- Console Log Card -->
             <div class="card log-card">
-                <label>Real-Time Debate Log</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label style="margin: 0;">Real-Time Debate Log</label>
+                    <button type="button" class="copy-btn" id="exportDebugBtn" style="background-color: #1f2937; border: 1px solid var(--border); font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px;">Export Debug JSON</button>
+                </div>
                 <div class="log-console" id="logConsole">
                     <!-- Live logs pop up here -->
                 </div>
@@ -833,22 +999,6 @@
             <!-- Sequential Debate Rounds Card -->
             <div class="rounds-container" id="roundsContainer">
                 <!-- Each round card generated here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Questions Modal Overlay -->
-    <div id="questionsModal" class="modal-overlay">
-        <div class="modal-card">
-            <div class="modal-header">
-                <span class="modal-title" id="questionsModalTitle">Questions for the Human</span>
-            </div>
-            <div class="modal-body" id="questionsModalBody">
-                <!-- Dynamically populated questions -->
-            </div>
-            <div class="modal-footer">
-                <div id="modalError" style="color: #fca5a5; font-size: 0.9rem; flex-grow: 1; align-self: center; display: none;"></div>
-                <button class="copy-btn" id="submitAnswersBtn">Submit Answers</button>
             </div>
         </div>
     </div>
@@ -877,6 +1027,113 @@
         let roundsData = []; // Cache for rounds DOM objects
         let currentRoundsModel = {}; // Store raw rounds info by number
         let currentSessionId = null;
+
+        const activeTierName = document.getElementById('activeTierName');
+        const activeTierModels = document.getElementById('activeTierModels');
+        const dialKnob = document.getElementById('dialKnob');
+        const dialLabels = document.querySelectorAll('.dial-label');
+        const exportDebugBtn = document.getElementById('exportDebugBtn');
+
+        const tiers = {
+            dev: {
+                name: 'Dev Tier (Cheapest)',
+                models: 'Claude Haiku 3.5 & GPT-4o-Mini',
+                angle: -75,
+                defender: 'claude-3-5-haiku',
+                challenger: 'gpt-4o-mini'
+            },
+            eco: {
+                name: 'Eco Tier (Cheaper)',
+                models: 'Claude Haiku 4 & GPT-Nano',
+                angle: -25,
+                defender: 'claude-haiku-4',
+                challenger: 'gpt-nano'
+            },
+            standard: {
+                name: 'Standard Tier (Balanced)',
+                models: 'Claude Sonnet 4.5 & GPT-5',
+                angle: 25,
+                defender: 'claude-sonnet-4-5',
+                challenger: 'gpt-5'
+            },
+            premium: {
+                name: 'Premium Tier (Expensive)',
+                models: 'Claude Opus 4.7 & GPT-5.5',
+                angle: 75,
+                defender: 'claude-opus-4-7',
+                challenger: 'gpt-5.5'
+            }
+        };
+
+        let selectedTier = 'standard';
+
+        function selectTier(tierKey) {
+            selectedTier = tierKey;
+            const tier = tiers[tierKey];
+            
+            // Rotate knob
+            dialKnob.style.transform = `rotate(${tier.angle}deg)`;
+            
+            // Update active label styling
+            dialLabels.forEach(lbl => {
+                if (lbl.dataset.tier === tierKey) {
+                    lbl.classList.add('active');
+                } else {
+                    lbl.classList.remove('active');
+                }
+            });
+            
+            // Update active names
+            activeTierName.textContent = tier.name;
+            activeTierModels.textContent = tier.models;
+        }
+
+        // Initialize Dial Selector Events
+        dialLabels.forEach(lbl => {
+            lbl.addEventListener('click', () => {
+                selectTier(lbl.dataset.tier);
+            });
+        });
+
+        dialKnob.addEventListener('click', () => {
+            const keys = Object.keys(tiers);
+            const currentIndex = keys.indexOf(selectedTier);
+            const nextIndex = (currentIndex + 1) % keys.length;
+            selectTier(keys[nextIndex]);
+        });
+
+        // Initialize Debug Log Exporter
+        exportDebugBtn.addEventListener('click', async () => {
+            if (!currentSessionId) {
+                alert("No active session to export debug info for.");
+                return;
+            }
+            try {
+                exportDebugBtn.disabled = true;
+                exportDebugBtn.textContent = 'Exporting...';
+                
+                const res = await fetch(`/api/sessions/${currentSessionId}/debug-export`);
+                if (!res.ok) {
+                    throw new Error("Failed to fetch debug export.");
+                }
+                const debugData = await res.json();
+                
+                const blob = new Blob([JSON.stringify(debugData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `crucible-debug-${currentSessionId.substring(0, 8)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                alert("Error exporting debug log: " + err.message);
+            } finally {
+                exportDebugBtn.disabled = false;
+                exportDebugBtn.textContent = 'Export Debug JSON';
+            }
+        });
 
         // Fetch active sessions and incoming handoffs on load
         window.addEventListener('DOMContentLoaded', () => {
@@ -957,13 +1214,17 @@
                                 
                                 try {
                                     const questionsModeValue = document.querySelector('input[name="questionsMode"]:checked').value;
+                                    const defenderModel = tiers[selectedTier].defender;
+                                    const challengerModel = tiers[selectedTier].challenger;
                                     const sessionRes = await fetch('/api/sessions/from-tumbler', {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({
                                             handoff_filename: h.filename,
                                             prompt: promptVal,
-                                            questions_mode: questionsModeValue
+                                            questions_mode: questionsModeValue,
+                                            defender_model: defenderModel,
+                                            challenger_model: challengerModel
                                         })
                                     });
                                     
@@ -1041,15 +1302,68 @@
             }
         }
 
+        let selectedFiles = [];
+
         // File dropzone trigger
-        filesInput.addEventListener('change', () => {
-            const files = filesInput.files;
-            if (files.length > 0) {
-                fileCountInfo.textContent = `${files.length} file(s) selected from folder`;
+        filesInput.addEventListener('change', (e) => {
+            selectedFiles = Array.from(e.target.files);
+            updateFileSelectionUI();
+        });
+
+        const fileDropzone = document.querySelector('.file-dropzone');
+        if (fileDropzone) {
+            fileDropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileDropzone.classList.add('dragover');
+            });
+
+            fileDropzone.addEventListener('dragleave', () => {
+                fileDropzone.classList.remove('dragover');
+            });
+
+            fileDropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileDropzone.classList.remove('dragover');
+                
+                if (e.dataTransfer.items) {
+                    selectedFiles = [];
+                    const promises = [];
+                    
+                    for (let i = 0; i < e.dataTransfer.items.length; i++) {
+                        const item = e.dataTransfer.items[i].webkitGetAsEntry();
+                        if (item) promises.push(traverseFileTree(item));
+                    }
+                    
+                    Promise.all(promises).then(updateFileSelectionUI);
+                }
+            });
+        }
+
+        function traverseFileTree(item, path = '') {
+            return new Promise((resolve) => {
+                if (item.isFile) {
+                    item.file((file) => {
+                        file.customRelativePath = path + file.name;
+                        selectedFiles.push(file);
+                        resolve();
+                    });
+                } else if (item.isDirectory) {
+                    const dirReader = item.createReader();
+                    dirReader.readEntries((entries) => {
+                        const promises = entries.map(entry => traverseFileTree(entry, path + item.name + '/'));
+                        Promise.all(promises).then(resolve);
+                    });
+                }
+            });
+        }
+
+        function updateFileSelectionUI() {
+            if (selectedFiles.length > 0) {
+                fileCountInfo.textContent = `${selectedFiles.length} file(s) selected`;
             } else {
                 fileCountInfo.textContent = 'No folder selected';
             }
-        });
+        }
 
         // Copy button behavior
         copyPromptBtn.addEventListener('click', () => {
@@ -1066,7 +1380,7 @@
             errorBanner.style.display = 'none';
             
             const promptValue = promptInput.value.trim();
-            const files = filesInput.files;
+            const files = selectedFiles;
 
             if (!promptValue) {
                 showError('The prompt cannot be empty');
@@ -1083,7 +1397,7 @@
             const formData = new FormData();
             formData.append('prompt', promptValue);
             for (let i = 0; i < files.length; i++) {
-                const path = files[i].webkitRelativePath || files[i].name;
+                const path = files[i].customRelativePath || files[i].webkitRelativePath || files[i].name;
                 const parts = path.split(/[/\\]/);
                 const isIgnored = parts.some(part => 
                     ['.git', 'node_modules', '__pycache__', '.venv', 'venv', 'env', 'dist', 'build', '.next', 'out', '.ipynb_checkpoints'].includes(part)
@@ -1102,6 +1416,8 @@
             }
             const questionsModeValue = document.querySelector('input[name="questionsMode"]:checked').value;
             formData.append('questions_mode', questionsModeValue);
+            formData.append('defender_model', tiers[selectedTier].defender);
+            formData.append('challenger_model', tiers[selectedTier].challenger);
 
             try {
                 await startStreamingDebate('/api/sessions/stream', formData);
@@ -1138,6 +1454,7 @@
             // Reset results view
             roundsContainer.innerHTML = '';
             synthesisCard.style.display = 'none';
+            document.getElementById('questionsCard').style.display = 'none';
             logConsole.innerHTML = '';
             defenderScoreVal.textContent = '0.0';
             challengerScoreVal.textContent = '0.0';
@@ -1207,6 +1524,12 @@
         function handleDebateEvent(event, data) {
             console.log(`SSE [${event}]:`, data);
             
+            // Hide questions card when debate moves forward
+            if (event !== 'questions_pending') {
+                const qCard = document.getElementById('questionsCard');
+                if (qCard) qCard.style.display = 'none';
+            }
+            
             switch (event) {
                 case 'session_started':
                     sessionStatusVal.textContent = 'Debating';
@@ -1216,7 +1539,7 @@
                 case 'questions_pending':
                     sessionStatusVal.textContent = 'Waiting for Human';
                     addLogLine('System', 'Orchestrator paused: pending questions for the human.', 'system');
-                    showQuestionsModal(data);
+                    showQuestionsCard(data);
                     break;
                 case 'questions_auto_answered':
                     addLogLine('System', `Questions auto-answered (Mode ON).`, 'system');
@@ -1438,10 +1761,10 @@
                 .replace(/'/g, "&#039;");
         }
 
-        function showQuestionsModal(data) {
-            const modal = document.getElementById('questionsModal');
-            const body = document.getElementById('questionsModalBody');
-            const errorDiv = document.getElementById('modalError');
+        function showQuestionsCard(data) {
+            const card = document.getElementById('questionsCard');
+            const body = document.getElementById('questionsCardBody');
+            const errorDiv = document.getElementById('questionsCardError');
             errorDiv.style.display = 'none';
             errorDiv.textContent = '';
             
@@ -1508,6 +1831,7 @@
                 
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="spinner"></span>Submitting...';
+                inputs.forEach(input => input.disabled = true);
                 
                 try {
                     // Send answers in parallel
@@ -1527,19 +1851,20 @@
                     
                     await Promise.all(postPromises);
                     
-                    // Close modal and resume status display
-                    modal.classList.remove('active');
+                    // Let SSE events handle visibility (hiding it when the debate resumes)
                     sessionStatusVal.textContent = 'Debating';
-                    addLogLine('System', 'Submitted answers to the orchestrator. Resuming debate...', 'system');
+                    addLogLine('System', 'Submitted answers. Waiting for orchestrator to resume...', 'system');
                 } catch (err) {
                     errorDiv.textContent = err.message || 'Error occurred submitting answers.';
                     errorDiv.style.display = 'block';
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Submit Answers';
+                    inputs.forEach(input => input.disabled = false);
                 }
             };
             
-            modal.classList.add('active');
+            card.style.display = 'block';
+            card.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>

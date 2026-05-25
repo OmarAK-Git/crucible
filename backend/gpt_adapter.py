@@ -8,7 +8,7 @@ See CRUCIBLE_SPEC.md Phase 3 gate criterion 2.
 import os
 import json
 import logging
-from typing import Any, Union
+from typing import Any, Union, Optional
 from openai import AsyncOpenAI
 from .schemas import AdversaryResponse
 
@@ -32,7 +32,8 @@ async def call_gpt_adversary(
     user_prompt: str,
     corpus: str,
     response_model: Any = AdversaryResponse,
-    raw_text: bool = False
+    raw_text: bool = False,
+    model: Optional[str] = None
 ) -> Any:
     """
     Calls the GPT adversary asynchronously using the AsyncOpenAI client.
@@ -50,7 +51,8 @@ async def call_gpt_adversary(
     else:
         user_content = f"Original Prompt:\n{user_prompt}\n\nCodebase Corpus:\n{corpus}"
     
-    model = os.environ.get("CRUCIBLE_GPT_MODEL", "gpt-5")
+    if not model:
+        model = os.environ.get("CRUCIBLE_GPT_MODEL", "gpt-5")
     kwargs = {
         "model": model,
         "messages": [

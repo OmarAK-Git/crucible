@@ -24,7 +24,14 @@ You will be given the original prompt, the corpus, the full debate
 history, and the list of accepted proposals. Return the final prompt as
 plain text — no JSON, no markdown fences."""
 
-async def write_final_prompt(original_prompt: str, corpus: str, debate_history: List[Round], winner: str) -> str:
+async def write_final_prompt(
+    original_prompt: str,
+    corpus: str,
+    debate_history: List[Round],
+    winner: str,
+    defender_model: str = "claude-sonnet-4-5",
+    challenger_model: str = "gpt-5"
+) -> str:
     """
     Calls the winning adversary to generate the final synthesized prompt.
     """
@@ -69,8 +76,8 @@ async def write_final_prompt(original_prompt: str, corpus: str, debate_history: 
     is_defender = winner.lower() in ("defender", "tied")
     
     if is_defender:
-        final_prompt = await call_claude_adversary(SYNTHESIS_SYSTEM_PROMPT, user_content, "", raw_text=True)
+        final_prompt = await call_claude_adversary(SYNTHESIS_SYSTEM_PROMPT, user_content, "", raw_text=True, model=defender_model)
     else:
-        final_prompt = await call_gpt_adversary(SYNTHESIS_SYSTEM_PROMPT, user_content, "", raw_text=True)
+        final_prompt = await call_gpt_adversary(SYNTHESIS_SYSTEM_PROMPT, user_content, "", raw_text=True, model=challenger_model)
         
     return final_prompt.strip()

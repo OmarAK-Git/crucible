@@ -52,6 +52,14 @@ def init_db():
                 # Column already exists
                 pass
 
+            # Check/Add defender_model and challenger_model columns to sessions table
+            for col in ["defender_model", "challenger_model"]:
+                try:
+                    conn.execute(f"ALTER TABLE sessions ADD COLUMN {col} TEXT;")
+                except sqlite3.OperationalError:
+                    # Column already exists
+                    pass
+
             conn.execute("""
             CREATE TABLE IF NOT EXISTS rounds (
                 session_id TEXT NOT NULL,
@@ -118,13 +126,24 @@ def init_db():
     finally:
         conn.close()
 
-def create_session(session_id: str, prompt: str, corpus: str, status: str = "running", questions_mode: str = "off"):
+def create_session(
+    session_id: str,
+    prompt: str,
+    corpus: str,
+    status: str = "running",
+    questions_mode: str = "off",
+    defender_model: Optional[str] = None,
+    challenger_model: Optional[str] = None
+):
     conn = get_connection()
     try:
         with conn:
             conn.execute(
-                "INSERT INTO sessions (session_id, prompt, corpus, status, questions_mode) VALUES (?, ?, ?, ?, ?);",
-                (session_id, prompt, corpus, status, questions_mode)
+                """
+                INSERT INTO sessions (session_id, prompt, corpus, status, questions_mode, defender_model, challenger_model)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
+                """,
+                (session_id, prompt, corpus, status, questions_mode, defender_model, challenger_model)
             )
     finally:
         conn.close()
@@ -423,6 +442,8 @@ def load_session_state(session_id: str) -> Optional[Dict[str, Any]]:
             "termination_reason": session["termination_reason"],
             "final_prompt": session["final_prompt"],
             "questions_mode": session.get("questions_mode", "off"),
+            "defender_model": session.get("defender_model", "claude-sonnet-4-5"),
+            "challenger_model": session.get("challenger_model", "gpt-5"),
             "rounds": rounds_list,
             "proposals_by_id": all_proposals
         }
@@ -523,5 +544,16 @@ def get_all_question_answers(session_id: str) -> List[Dict[str, Any]]:
             (session_id,)
         )
         return [dict(row) for row in cur.fetchall()]
+    finally:
+        conn.close()
+
+def get_question(question_id: str) -> Optional[Dict[str, Any]]:
+    conn = get_connection()
+    try:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM question_answers WHERE question_id = ?;", (question_id,))
+        row = cur.fetchone()
+        return dict(row) if row else None
     finally:
         conn.close()

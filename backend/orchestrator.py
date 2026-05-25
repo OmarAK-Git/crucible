@@ -151,7 +151,9 @@ async def run_debate(
     corpus: str,
     session_id: Optional[str] = None,
     event_queue: Optional[asyncio.Queue] = None,
-    questions_mode: str = "off"
+    questions_mode: str = "off",
+    defender_model: Optional[str] = None,
+    challenger_model: Optional[str] = None
 ) -> DebateResult:
     """
     Runs the full Crucible Phase 3 debate loop.
@@ -167,11 +169,18 @@ async def run_debate(
         if state and state["status"] == "running":
             is_resume = True
             questions_mode = state.get("questions_mode", questions_mode)
-            logger.info(f"Resuming session {session_id} with questions_mode {questions_mode}")
+            defender_model = state.get("defender_model", defender_model)
+            challenger_model = state.get("challenger_model", challenger_model)
+            logger.info(f"Resuming session {session_id} with questions_mode {questions_mode}, defender_model {defender_model}, challenger_model {challenger_model}")
             
     if not is_resume:
         session_id = uuid.uuid4().hex
-        db.create_session(session_id, prompt, corpus, questions_mode=questions_mode)
+        db.create_session(
+            session_id, prompt, corpus,
+            questions_mode=questions_mode,
+            defender_model=defender_model,
+            challenger_model=challenger_model
+        )
         logger.info(f"Started fresh debate session {session_id} with questions_mode {questions_mode}")
     else:
         db.update_session_questions_mode(session_id, questions_mode)
@@ -258,7 +267,11 @@ async def run_debate(
         await emit_event(event_queue, "turn_started", {"round_number": 1, "adversary": "challenger"})
         
         # Run concurrently
-        round_1_results = await run_round_1_adversaries(prompt, corpus)
+        round_1_results = await run_round_1_adversaries(
+            prompt, corpus,
+            defender_model=defender_model,
+            challenger_model=challenger_model
+        )
         
         # Map Defender
         def_raw = round_1_results["defender_response"]["proposals"]
@@ -416,7 +429,8 @@ async def run_debate(
             
             # Call Claude (Defender)
             defender_turn_resp: TurnResponse = await call_claude_adversary(
-                system_prompt, user_content, "", response_model=TurnResponse
+                system_prompt, user_content, "", response_model=TurnResponse,
+                model=defender_model
             )
             
             # Assign IDs to Defender's new proposals
@@ -512,7 +526,8 @@ async def run_debate(
             
             # Call GPT (Challenger)
             challenger_turn_resp: TurnResponse = await call_gpt_adversary(
-                system_prompt, user_content, "", response_model=TurnResponse
+                system_prompt, user_content, "", response_model=TurnResponse,
+                model=challenger_model
             )
             
             # Assign IDs to Challenger's new proposals
@@ -597,7 +612,11 @@ async def run_debate(
     await emit_event(event_queue, "synthesis_started", {"winner": winner})
     
     # 2. Write final prompt
-    final_prompt = await write_final_prompt(prompt, corpus, rounds, winner)
+    final_prompt = await write_final_prompt(
+        prompt, corpus, rounds, winner,
+        defender_model=defender_model,
+        challenger_model=challenger_model
+    )
     
     # 3. Save completed session details
     db.update_session(

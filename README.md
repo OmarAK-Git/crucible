@@ -100,6 +100,17 @@ Adversaries evaluate the user's prompt against the codebase's existing stated pu
 ### H. Tumbler as Gatekeeper
 Crucible enforces a strict pipeline constraint: **it will only run prompts against codebases that have received a `PASS` verdict from Tumbler**. Designing new features on top of broken, vulnerable, or untested code introduces architectural instability. If a codebase returns a `FIX` verdict in Tumbler, the "Push to Crucible" pipeline is disabled, prompting the developer to resolve security blockers first.
 
+### I. Model Selector Dial
+Developers frequently need to balance API costs and processing speed against reasoning capability. Crucible features a physical-style rotary knob dial that allows selecting between 4 model tiers:
+* **Dev**: Fast, economical testing utilizing `claude-3-5-haiku` and `gpt-4o-mini`.
+* **Eco**: Ultra-cheap sweeps utilizing `claude-haiku-4` and `gpt-nano`.
+* **Standard**: Default production debate using `claude-sonnet-4-5` and `gpt-5`.
+* **Premium**: Maximum reasoning depth using `claude-opus-4-7` and `gpt-5.5` for complex architectures.
+
+### J. Inline Question Space & Debug Exporter
+* **Inline Questions Space**: Rather than using intrusive, full-screen blur modals that block the user from reading the active debate log or rounds history while drafting answers to pending questions, the human-in-the-loop interface has been moved to a persistent, inline layout. This preserves historical context and ensures an ergonomics-first flow.
+* **Debug Exporter**: Users can export the complete structured state of a session (prompt, corpus, rounds, history, and QA records) to a `.json` debug file at any stage of the debate.
+
 ---
 
 ## 3. Architecture
@@ -328,6 +339,9 @@ python -m uvicorn backend.main:app --port 8000 --reload
 * [x] Human-in-the-Loop questions mode (ON/OFF).
 * [x] Scope-at-Purpose checking.
 * [x] Loose-coupled file-based handoff from Tumbler.
+* [x] Model Selector Dial (Dev, Eco, Standard, Premium presets).
+* [x] Inline non-intrusive Questions Card (eliminating the blurred modal layout).
+* [x] Debug Log Exporter (downloading session states in JSON format).
 
 ### V2 Backlog
 * **Review-derived context passing:** Update the handoff payload so Tumbler passes codebase purpose notes and architectural patterns directly to Crucible, skipping the initial discovery phase.
