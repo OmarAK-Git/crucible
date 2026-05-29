@@ -101,13 +101,13 @@ async def handle_turn_questions(
         return
         
     for idx, q in enumerate(questions, 1):
-        q_id = f"Q-R{round_number}-{adversary}-{idx}"
+        q_id = f"Q-{session_id}-R{round_number}-{adversary}-{idx}"
         db.save_question(session_id, round_number, adversary, q_id, q)
         
     if questions_mode == "on":
         auto_answers = []
         for idx, q in enumerate(questions, 1):
-            q_id = f"Q-R{round_number}-{adversary}-{idx}"
+            q_id = f"Q-{session_id}-R{round_number}-{adversary}-{idx}"
             db.save_answer(q_id, q.recommended_default, "auto_default")
             auto_answers.append({
                 "question_id": q_id,
@@ -124,7 +124,7 @@ async def handle_turn_questions(
     else:
         pending_qs = []
         for idx, q in enumerate(questions, 1):
-            q_id = f"Q-R{round_number}-{adversary}-{idx}"
+            q_id = f"Q-{session_id}-R{round_number}-{adversary}-{idx}"
             pending_qs.append({
                 "question_id": q_id,
                 "question": q.question,

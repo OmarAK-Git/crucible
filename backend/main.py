@@ -79,9 +79,10 @@ async def start_or_resume_debate(
         active_challenger_model = state.get("challenger_model", "gpt-5")
     else:
         # Start new flow
-        # Check concurrency V1 constraint: reject new session if one is already running
-        active = db.get_active_sessions()
-        if active:
+        # Check concurrency V1 constraint: reject new session if one is already running in memory
+        active_db = db.get_active_sessions()
+        truly_active = [s for s in active_db if s["session_id"] in active_sessions]
+        if truly_active:
             return JSONResponse(
                 status_code=409,
                 content={"error": "A debate session is already active. V1 only supports one running session at a time."}
@@ -138,15 +139,27 @@ async def start_or_resume_debate(
  
     # Spawn the orchestrator in the background so it is not tied to the client connection
     event_queue = asyncio.Queue()
-    debate_task = asyncio.create_task(run_debate(
-        prompt=debate_prompt,
-        corpus=debate_corpus,
-        session_id=active_session_id,
-        event_queue=event_queue,
-        questions_mode=questions_mode,
-        defender_model=active_defender_model,
-        challenger_model=active_challenger_model
-    ))
+    
+    async def debate_wrapper():
+        try:
+            await run_debate(
+                prompt=debate_prompt,
+                corpus=debate_corpus,
+                session_id=active_session_id,
+                event_queue=event_queue,
+                questions_mode=questions_mode,
+                defender_model=active_defender_model,
+                challenger_model=active_challenger_model
+            )
+        except Exception as e:
+            logger.exception(f"Debate session {active_session_id} failed with exception: {e}")
+            db.update_session(active_session_id, "failed", winner=None, termination_reason=str(e))
+            raise e
+        finally:
+            if active_session_id in active_sessions:
+                del active_sessions[active_session_id]
+
+    debate_task = asyncio.create_task(debate_wrapper())
 
     async def event_generator():
         try:

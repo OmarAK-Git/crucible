@@ -16,15 +16,39 @@ logger = logging.getLogger(__name__)
 
 def clean_json_string(text: str) -> str:
     """
-    Strips markdown code block backticks if present.
+    Finds the first JSON object (enclosed in curly braces) in the text.
+    Handles extra text before or after the JSON block.
     """
     text = text.strip()
-    if text.startswith("```"):
-        first_newline = text.find("\n")
-        if first_newline != -1:
-            text = text[first_newline:].strip()
-        if text.endswith("```"):
-            text = text[:-3].strip()
+    start = text.find("{")
+    if start == -1:
+        return text
+        
+    brace_count = 0
+    in_string = False
+    escape = False
+    
+    for idx in range(start, len(text)):
+        char = text[idx]
+        
+        if in_string:
+            if char == '\\' and not escape:
+                escape = True
+            elif char == '"' and not escape:
+                in_string = False
+            else:
+                escape = False
+        else:
+            if char == '"':
+                in_string = True
+                escape = False
+            elif char == '{':
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if brace_count == 0:
+                    return text[start:idx+1]
+                    
     return text
 
 async def call_claude_adversary(
@@ -52,8 +76,21 @@ async def call_claude_adversary(
     else:
         user_content = f"Original Prompt:\n{user_prompt}\n\nCodebase Corpus:\n{corpus}"
     
-    if not model:
-        model = os.environ.get("CRUCIBLE_CLAUDE_MODEL", "claude-sonnet-4-5")
+    MODEL_MAPPING = {
+        "claude-3-5-haiku": "claude-haiku-4-5-20251001",
+        "claude-haiku-4": "claude-haiku-4-5-20251001",
+        "claude-sonnet-4-5": "claude-sonnet-4-5",
+        "claude-opus-4-7": "claude-opus-4-7"
+    }
+    if model:
+        model = MODEL_MAPPING.get(model, model)
+    else:
+        env_model = os.environ.get("CRUCIBLE_CLAUDE_MODEL")
+        if env_model:
+            model = env_model
+        else:
+            model = "claude-sonnet-4-5"
+            
     response = await client.messages.create(
         model=model,
         max_tokens=4000,
@@ -79,4 +116,6 @@ async def call_claude_adversary(
         data = json.loads(cleaned_content)
         return response_model.model_validate(data)
     except Exception as e:
+        logger.error(f"Claude JSON parsing failed. Raw response: {content}")
+        print(f"Claude JSON parsing failed. Raw response: {content}")
         raise ValueError(f"The Claude — The Defender returned malformed JSON: {e}")

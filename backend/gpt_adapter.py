@@ -16,15 +16,39 @@ logger = logging.getLogger(__name__)
 
 def clean_json_string(text: str) -> str:
     """
-    Strips markdown code block backticks if present.
+    Finds the first JSON object (enclosed in curly braces) in the text.
+    Handles extra text before or after the JSON block.
     """
     text = text.strip()
-    if text.startswith("```"):
-        first_newline = text.find("\n")
-        if first_newline != -1:
-            text = text[first_newline:].strip()
-        if text.endswith("```"):
-            text = text[:-3].strip()
+    start = text.find("{")
+    if start == -1:
+        return text
+        
+    brace_count = 0
+    in_string = False
+    escape = False
+    
+    for idx in range(start, len(text)):
+        char = text[idx]
+        
+        if in_string:
+            if char == '\\' and not escape:
+                escape = True
+            elif char == '"' and not escape:
+                in_string = False
+            else:
+                escape = False
+        else:
+            if char == '"':
+                in_string = True
+                escape = False
+            elif char == '{':
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if brace_count == 0:
+                    return text[start:idx+1]
+                    
     return text
 
 async def call_gpt_adversary(
@@ -51,8 +75,21 @@ async def call_gpt_adversary(
     else:
         user_content = f"Original Prompt:\n{user_prompt}\n\nCodebase Corpus:\n{corpus}"
     
-    if not model:
-        model = os.environ.get("CRUCIBLE_GPT_MODEL", "gpt-5")
+    MODEL_MAPPING = {
+        "gpt-4o-mini": "gpt-4o-mini",
+        "gpt-nano": "gpt-4o-mini",
+        "gpt-5": "gpt-4o",
+        "gpt-5.5": "gpt-4o"
+    }
+    if model:
+        model = MODEL_MAPPING.get(model, model)
+    else:
+        env_model = os.environ.get("CRUCIBLE_GPT_MODEL")
+        if env_model:
+            model = env_model
+        else:
+            model = "gpt-4o"
+            
     kwargs = {
         "model": model,
         "messages": [
@@ -81,4 +118,6 @@ async def call_gpt_adversary(
         data = json.loads(cleaned_content)
         return response_model.model_validate(data)
     except Exception as e:
+        logger.error(f"GPT JSON parsing failed. Raw response: {content}")
+        print(f"GPT JSON parsing failed. Raw response: {content}")
         raise ValueError(f"The GPT — The Challenger returned malformed JSON: {e}")

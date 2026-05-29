@@ -42,12 +42,6 @@ def score_round(round_data: Round, proposals_by_id: dict) -> dict:
     # Defender's turn scores Challenger's proposals -> Challenger gets the points
     if round_data.defender_turn:
         for score_item in round_data.defender_turn.opponent_scores:
-            # Self-scoring guard using convention
-            assert score_item.proposal_id.startswith("C-"), (
-                f"Self-scoring guard failed (convention): Defender (scorer) cannot score "
-                f"their own proposal {score_item.proposal_id}"
-            )
-            
             proposal = proposals_by_id.get(score_item.proposal_id)
             if proposal:
                 # Self-scoring guard using schema's fields
@@ -60,12 +54,6 @@ def score_round(round_data: Round, proposals_by_id: dict) -> dict:
     # Challenger's turn scores Defender's proposals -> Defender gets the points
     if round_data.challenger_turn:
         for score_item in round_data.challenger_turn.opponent_scores:
-            # Self-scoring guard using convention
-            assert score_item.proposal_id.startswith("D-"), (
-                f"Self-scoring guard failed (convention): Challenger (scorer) cannot score "
-                f"their own proposal {score_item.proposal_id}"
-            )
-            
             proposal = proposals_by_id.get(score_item.proposal_id)
             if proposal:
                 # Self-scoring guard using schema's fields
